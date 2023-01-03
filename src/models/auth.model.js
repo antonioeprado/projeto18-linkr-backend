@@ -8,7 +8,7 @@ export const signUpSchema = joi.object({
   password: joi.string().max(40).required(),
   username: joi
     .string()
-    .pattern(/^[a-zA-Z0-9-\s]{3,20}$/)
+    .pattern(/^[a-zA-Z0-9` `]{3,20}$/)
     .required(),
   pictureUrl: joi.string().uri().required(),
 });
