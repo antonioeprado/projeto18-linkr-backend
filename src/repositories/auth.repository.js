@@ -20,7 +20,7 @@ export const User = {
 							'description', p.description
 						)
 					)
-				)
+				) AS posts
 			FROM users u
 			JOIN posts p
 				ON u.id = p."userId"
