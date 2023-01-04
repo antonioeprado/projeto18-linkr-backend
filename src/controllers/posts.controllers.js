@@ -2,13 +2,6 @@ import connection from "../database/db.js";
 import urlMetadata from "url-metadata";
 import dayjs from "dayjs";
 
-/* const postsTable = {
-    userId,
-    url,
-    description,
-    createdAt
-} */
-
 export async function publicateLink(req, res) {
   const { url, description } = req.body;
   const userId = res.locals.userId;
@@ -25,23 +18,6 @@ export async function publicateLink(req, res) {
     console.log(err.message);
   }
 }
-
-/* urlMetadata(url)
-.then((answer) => {
-  return res.status(201).send({
-    userName: "test",
-    userDescription: description,
-    linkInfo: {
-      title: answer.title,
-      description: answer.description,
-      url: answer.url,
-      image: answer.image,
-    },
-  });
-})
-.catch((err) => {
-  console.log(err);
-}); */
 
 export async function findAllLinks(req, res) {
   const userId = res.locals.userId;
