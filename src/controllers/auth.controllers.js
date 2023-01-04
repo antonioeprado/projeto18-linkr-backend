@@ -54,3 +54,36 @@ export async function userById(req, res) {
     res.sendStatus(500);
   }
 }
+
+export async function postSignIn(req, res) {
+  const { email, password } = req.body;
+
+  try {
+    const getUser = await connection.query(
+      `SELECT * FROM users WHERE email = $1`,
+      [email]
+    );
+
+    if (!bcrypt.compareSync(password, getUser.rows[0].password)) {
+      return res.status(401).send("Senha incorreta");
+    }
+
+    const result = await connection.query(
+      `INSERT INTO sessions ("userId") VALUES ($1) RETURNING id`,
+      [getUser.rows[0].id]
+    );
+
+    const payload = {
+      userId: getUser.rows[0].id,
+      userPicture: getUser.rows[0].pictureUrl,
+    };
+
+    const secret = process.env.JWT_SECRET;
+
+    const token = jwt.sign(payload, secret);
+
+    res.status(200).send(token);
+  } catch (err) {
+    console.log(err);
+  }
+}
