@@ -1,4 +1,4 @@
-import postModel from "../models/post.model";
+import postModel from "../models/post.model.js";
 
 export default function postModelValidation(req, res, next) {
   if (!req.body) {
