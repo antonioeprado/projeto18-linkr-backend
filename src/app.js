@@ -2,9 +2,9 @@ import express from "express";
 import dotenv from "dotenv";
 import router from "./routes/auth.routes.js";
 import hashtagsRoutes from "./routes/hashtags.routes.js";
+import authRouter from "./routes/auth.routes.js";
 import cors from "cors";
 dotenv.config();
-import authRouter from "./routes/auth.routes.js";
 
 const app = express();
 app.use(express.json());
