@@ -1,4 +1,3 @@
-import { func } from "joi";
 import connection from "../database/db.js";
 
 export default async function tokenValidation(req,res,next){
@@ -11,3 +10,4 @@ export default async function tokenValidation(req,res,next){
 }
 
 //esperar o sign-in ser feito
+//guardar o userId e o userName que virão do token
