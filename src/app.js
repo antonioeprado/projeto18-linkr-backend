@@ -17,12 +17,7 @@ app.use(authRouter);
 app.use(hashtagsRoutes);
 app.use(postRouter);
 
-
 const PORT = 4000 || process.env.PORT;
 app.listen(PORT, () => {
-<<<<<<< HEAD
 	console.log(`Server running on port: ${PORT}`);
-=======
-  console.log(`Server running on port: ${PORT}`)
->>>>>>> 1850b586f9926df014bc94f2b8a7948394d5ea56
 });
