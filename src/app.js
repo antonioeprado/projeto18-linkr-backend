@@ -4,6 +4,7 @@ import router from "./routes/auth.routes.js";
 import cors from "cors";
 dotenv.config();
 
+import postRouter from "./routes/posts.routes.js";
 import authRouter from "./routes/auth.routes.js";
 
 const app = express();
@@ -11,8 +12,9 @@ app.use(express.json());
 app.use(cors());
 app.use(router);
 app.use(authRouter);
+app.use(postRouter);
 
 const PORT = 4000 || process.env.PORT;
 app.listen(PORT, () => {
-  `Server running on port: ${PORT}`;
+  console.log(`Server running on port: ${PORT}`)
 });
