@@ -34,9 +34,10 @@ export const User = {
 		return connection.query(`SELECT * FROM users WHERE email = $1`, [email]);
 	},
 	findByUsername: function (username) {
-		return connection.query(`SELECT * FROM users WHERE username = $1`, [
-			username,
-		]);
+		return connection.query(
+			`SELECT u.id, u.email, u.username, u."pictureUrl" FROM users u WHERE username = $1 OR username LIKE $1 || '%'`,
+			[username]
+		);
 	},
 	createUser: function (obj) {
 		return connection.query(
