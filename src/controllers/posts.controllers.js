@@ -6,24 +6,27 @@ import postHashtag from "../repositories/post.hashtag.repository.js";
 
 export async function publicateLink(req, res) {
   const { url, description } = req.body;
-  const userId = res.locals.userId;
+  const { userId } = res.locals.user;
   try {
     //insert post na posts table:
-    const now = `${dayjs().year()}/${
+    /*     const now = `${dayjs().year()}/${
       dayjs().month().length + 1 < 2
         ? dayjs().month() + 1
         : "0" + (dayjs().month() + 1)
-    }/${dayjs().date().length < 2 ? dayjs().date() : "0" + dayjs().date()}`;
-
-    /*     await connection.query(`INSERT INTO posts ("userId", url, description, "createdAt") VALUES $1, $2, $3, $4;`, [userId, url, description, now]) */
-
+    }/${dayjs().date().length < 2 ? dayjs().date() : "0" + dayjs().date()}`; */
+    await connection.query(
+      `INSERT INTO posts ("userId",url,description) VALUES ($1,$2,$3);`,
+      [userId, url, description]
+    );
+      
     //insert hashtag na hashtags table:
-    console.log(filterHashtags(description));
+    /*     console.log(filterHashtags(description));
     const hashtags = filterHashtags(description);
     hashtags.forEach(async (h) => {
       await postHashtag(h, now);
-    });
+    }); */
     res.status(201).send("Post criado com sucesso!");
+    //res.status(201).send("Post criado com sucesso!");
   } catch (err) {
     res.status(500).send(err.message);
     console.log(err.message);

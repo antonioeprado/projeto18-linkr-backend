@@ -1,6 +1,6 @@
-export default function postHashtag(hashtag, now) {
+export default function postHashtag(hashtag) {
   return connection.query(
-    `INSERT INTO hashtags (tag, "createdAt") VALUES $1,$2;`,
-    [tag, now]
+    `INSERT INTO hashtags (tag, "createdAt") VALUES ($1);`,
+    [tag]
   );
 }
