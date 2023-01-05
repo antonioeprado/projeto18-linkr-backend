@@ -30,4 +30,10 @@ export const User = {
 			[id]
 		);
 	},
+	findByName: function (name) {
+		return connection.query(
+			`SELECT u.id, u.username, u."pictureUrl" FROM users u WHERE username LIKE $1 || '%'`,
+			[name]
+		);
+	},
 };

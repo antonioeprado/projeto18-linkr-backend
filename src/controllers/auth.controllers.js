@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import connection from "../database/db.js";
-import { User } from "../repositories/auth.repository.js";
 
 export async function postSignUp(req, res) {
 	const { email, password, username, pictureUrl } = req.body;
@@ -41,6 +40,22 @@ export async function postSignUp(req, res) {
 	}
 }
 
+import { User } from "../repositories/auth.repository.js";
+
+export async function userById(req, res) {
+	const { id } = req.params;
+	try {
+		const query = await User.findById(id);
+		const user = query.rows;
+		res.status(200).send(user);
+	} catch (error) {
+		console.log(`Error trying to find user with id: ${id}`);
+		console.log(`Server returned: ${error}`);
+		res.sendStatus(500);
+
+	}
+}
+
 export async function postSignIn(req, res) {
 	const { email, password } = req.body;
 
@@ -74,14 +89,14 @@ export async function postSignIn(req, res) {
 	}
 }
 
-export async function getUserById(req, res) {
-	const { id } = req.params;
+export async function findUserByName(req, res) {
+	const { username } = req.body;
 	try {
-		const query = await User.findById(id);
-		const user = query.rows;
-		res.status(200).send(user);
+		const query = await User.findByName(username);
+		if (!query.rowCount) return res.sendStatus(404);
+		res.status(200).send(query.rows);
 	} catch (error) {
-		console.log(`Error trying to find user with id: ${id}`);
+		console.log(`Error trying to find user with username: ${username}`);
 		console.log(`Server returned: ${error}`);
 		res.sendStatus(500);
 	}
