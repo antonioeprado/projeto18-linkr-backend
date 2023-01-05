@@ -42,7 +42,7 @@ export async function postSignUp(req, res) {
 
 import { User } from "../repositories/auth.repository.js";
 
-export async function userById(req, res) {
+export async function getUserById(req, res) {
 	const { id } = req.params;
 	try {
 		const query = await User.findById(id);
@@ -52,7 +52,6 @@ export async function userById(req, res) {
 		console.log(`Error trying to find user with id: ${id}`);
 		console.log(`Server returned: ${error}`);
 		res.sendStatus(500);
-
 	}
 }
 
