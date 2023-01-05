@@ -12,3 +12,11 @@ export const signUpSchema = joi.object({
     .required(),
   pictureUrl: joi.string().uri().required(),
 });
+
+export const signInSchema = joi.object({
+  email: joi
+    .string()
+    .pattern(/[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+/)
+    .required(),
+  password: joi.string().max(40).required(),
+});
