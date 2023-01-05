@@ -11,7 +11,7 @@ export const User = {
 		return connection.query(
 			`
 			SELECT
-				u.name,
+				u.username,
 				ARRAY_TO_JSON(
 					ARRAY_AGG(
 						JSON_BUILD_OBJECT(
@@ -24,7 +24,7 @@ export const User = {
 			FROM users u
 			JOIN posts p
 				ON u.id = p."userId"
-			WHERE id=$1
+			WHERE u.id=$1
 			GROUP BY u.id
 			`,
 			[id]

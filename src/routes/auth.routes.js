@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
 	findUserByName,
+	getUserById,
 	postSignIn,
 	postSignUp,
 } from "../controllers/auth.controllers.js";
@@ -16,5 +17,6 @@ router.post("/sign-up", signUpSchemaValidation, postSignUp);
 router.post("/sign-in", signInSchemaValidation, postSignIn);
 
 router.post("/user", ensureAuthenticated, findUserByName);
+router.get("/user/:id", ensureAuthenticated, getUserById);
 
 export default router;

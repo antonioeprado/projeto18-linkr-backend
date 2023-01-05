@@ -52,6 +52,7 @@ export async function userById(req, res) {
 		console.log(`Error trying to find user with id: ${id}`);
 		console.log(`Server returned: ${error}`);
 		res.sendStatus(500);
+
 	}
 }
 
