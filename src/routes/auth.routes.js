@@ -1,15 +1,16 @@
 import { Router } from "express";
 import {
-	findUserByName,
-	getUserById,
-	postSignIn,
-	postSignUp,
+  findUserByName,
+  userById,
+  postSignIn,
+  postSignUp,
 } from "../controllers/auth.controllers.js";
 import {
 	ensureAuthenticated,
 	signInSchemaValidation,
 	signUpSchemaValidation,
 	validadeSearchQuery,
+
 } from "../middlewares/auth.validation.middleware.js";
 
 const router = Router();
