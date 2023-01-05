@@ -27,23 +27,12 @@ export async function publicateLink(req, res) {
   }
 }
 
+//pega todos os posts (links) do user loggado (que enviou o token)
 export async function findAllLinks(req, res) {
-  const userId = res.locals.userId;
+  const { userId } = res.locals.user;
   try {
-    const { rows } = connection.query(
-      `SELECT 
-        users.name AS "userName",
-        posts.description, 
-        posts.url, 
-        posts."createdAt" 
-      FROM 
-        posts 
-      JOIN 
-        users 
-      ON 
-       users.id=posts."userId" 
-      WHERE 
-       posts."userId"=$1;`,
+    const { rows } = await connection.query(
+      `SELECT u.username AS "userName", p.description, p.url, p."createdAt" FROM users u JOIN posts p ON u.id=p."userId" WHERE p."userId"=$1;`,
       [userId]
     );
     urlMetadata(rows[0].url)
