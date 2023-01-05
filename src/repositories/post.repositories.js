@@ -16,7 +16,7 @@ export function postPublication(userId, url, description){
 
 export function getAllPublicationsById(userId){
   return connection.query(
-    `SELECT u.username AS "userName", p.description, p.url, p."createdAt" FROM users u JOIN posts p ON u.id=p."userId" WHERE p."userId"=$1 ORDER BY DESC LIMIT 20;`,
+    `SELECT u.username AS "userName", p.description, p.url, p."createdAt" FROM users u JOIN posts p ON u.id=p."userId" WHERE p."userId"=$1 ORDER BY id DESC LIMIT 20;`,
     [userId]
   );
 }
