@@ -33,7 +33,7 @@ export function signInSchemaValidation(req, res, next) {
   next();
 }
 
-export async function ensureAuthenticated(req, res, next) {
+export async function ensureAuthentication(req, res, next) {
   const authorization = req.headers.authorization;
   const token = authorization?.replace("Bearer ", "");
 
@@ -42,9 +42,12 @@ export async function ensureAuthenticated(req, res, next) {
   }
 
   try {
-    const { userId, userPicture } = jwt.verify(token, process.env.JWT_SECRET);
+    const { userId, userPicture, sessionId } = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
 
-    res.locals.user = { userId, userPicture };
+    res.locals.user = { userId, userPicture, sessionId };
 
     next();
   } catch (err) {
