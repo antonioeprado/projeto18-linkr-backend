@@ -2,11 +2,20 @@ import connection from "../database/db.js";
 import jwt from "jsonwebtoken";
 
 export async function hashtags(req, res) {
-  // const token = req.headers.authorization.replace("Bearer ", "");
-  // const secretKey = process.env.JWT_SECRET;
+  const token = req.headers.authorization?.replace("Bearer ", "");
+  const secretKey = process.env.JWT_SECRET;
   const { hashtags } = req.params;
+  if(!token){
+    return res.sendStatus(401);
+  }
 
   try {
+    const { userId, sessionId } = jwt.verify(token, secretKey);
+    console.log(userId, sessionId);
+
+    if(!userId){
+        return res.sendStatus(401);
+    }
     // const sessionExist = jwt.verify(token, secretKey);
     // if (!sessionExist) {
     //     return res.sendStatus(404);
@@ -26,7 +35,6 @@ export async function hashtags(req, res) {
         WHERE tag = $1 GROUP BY u.username, u."pictureUrl", p.url, p.description;`,
       [hashtags]
     );
-    console.log(hashtagClick.rows);
 
     res.send(hashtagClick.rows);
   } catch (err) {
