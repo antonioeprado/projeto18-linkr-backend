@@ -1,28 +1,27 @@
 import connection from "../database/db.js";
 import urlMetadata from "url-metadata";
-import dayjs from "dayjs";
 import filterHashtags from "../repositories/filter.hashtags.repository.js";
-import postHashtag from "../repositories/post.hashtag.repository.js";
+import {
+  postHashtag,
+  postPublication,
+  getAllPublications,
+} from "../repositories/post.repositories.js";
 
 export async function publicateLink(req, res) {
   const { url, description } = req.body;
-  const userId = res.locals.userId;
+  const { userId } = res.locals.user;
   try {
     //insert post na posts table:
-    const now = `${dayjs().year()}/${
-      dayjs().month().length + 1 < 2
-        ? dayjs().month() + 1
-        : "0" + (dayjs().month() + 1)
-    }/${dayjs().date().length < 2 ? dayjs().date() : "0" + dayjs().date()}`;
-
-    /*     await connection.query(`INSERT INTO posts ("userId", url, description, "createdAt") VALUES $1, $2, $3, $4;`, [userId, url, description, now]) */
+    await postPublication(userId, url, description);
 
     //insert hashtag na hashtags table:
-    console.log(filterHashtags(description));
+    //array de hashtags filtradas da descrição do post:
     const hashtags = filterHashtags(description);
+    //para cada hashtag da array hashtags, é inserida uma row hashtag na tabela hashtags
     hashtags.forEach(async (h) => {
-      await postHashtag(h, now);
+      await postHashtag(h);
     });
+
     res.status(201).send("Post criado com sucesso!");
   } catch (err) {
     res.status(500).send(err.message);
@@ -30,25 +29,12 @@ export async function publicateLink(req, res) {
   }
 }
 
+//pega todos os posts (links) do user loggado (que enviou o token)
 export async function findAllLinks(req, res) {
-  const userId = res.locals.userId;
+  const { userId } = res.locals.user;
   try {
-    const { rows } = connection.query(
-      `SELECT 
-        users.name AS "userName",
-        posts.description, 
-        posts.url, 
-        posts."createdAt" 
-      FROM 
-        posts 
-      JOIN 
-        users 
-      ON 
-       users.id=posts."userId" 
-      WHERE 
-       posts."userId"=$1;`,
-      [userId]
-    );
+    const { rows } = await getAllPublications(userId);
+    //library que pega os dados do link da publicação e envia pro front:
     urlMetadata(rows[0].url)
       .then((answer) => {
         return res.status(201).send({
