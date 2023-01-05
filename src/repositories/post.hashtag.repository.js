@@ -1,4 +1,6 @@
-export default function postHashtag(hashtag) {
+import connection from "../database/db.js";
+
+export default function postHashtag(tag) {
   return connection.query(
     `INSERT INTO hashtags (tag, "createdAt") VALUES ($1);`,
     [tag]

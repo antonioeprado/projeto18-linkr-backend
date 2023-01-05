@@ -18,14 +18,16 @@ export async function publicateLink(req, res) {
       `INSERT INTO posts ("userId",url,description) VALUES ($1,$2,$3);`,
       [userId, url, description]
     );
-      
+
     //insert hashtag na hashtags table:
-    /*     console.log(filterHashtags(description));
+    console.log(filterHashtags(description));
     const hashtags = filterHashtags(description);
     hashtags.forEach(async (h) => {
-      await postHashtag(h, now);
-    }); */
-    res.status(201).send("Post criado com sucesso!");
+      await postHashtag(h);
+    }); 
+    const {rows} = await connection.query(`SELECT * FROM hashtags;`)
+    res.status(201).send(rows);
+    //res.status(201).send("Post criado com sucesso!");
     //res.status(201).send("Post criado com sucesso!");
   } catch (err) {
     res.status(500).send(err.message);
