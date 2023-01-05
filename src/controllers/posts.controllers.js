@@ -34,6 +34,7 @@ export async function findAllLinks(req, res) {
   const { userId } = res.locals.user;
   try {
     const { rows } = await getAllPublications(userId);
+    //library que pega os dados do link da publicação e envia pro front:
     urlMetadata(rows[0].url)
       .then((answer) => {
         return res.status(201).send({
