@@ -13,3 +13,10 @@ export function postPublication(userId, url, description){
     [userId, url, description]
   );
 }
+
+export function getAllPublications(userId){
+  return connection.query(
+    `SELECT u.username AS "userName", p.description, p.url, p."createdAt" FROM users u JOIN posts p ON u.id=p."userId" WHERE p."userId"=$1;`,
+    [userId]
+  );
+}

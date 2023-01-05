@@ -4,6 +4,7 @@ import filterHashtags from "../repositories/filter.hashtags.repository.js";
 import {
   postHashtag,
   postPublication,
+  getAllPublications,
 } from "../repositories/post.repositories.js";
 
 export async function publicateLink(req, res) {
@@ -12,7 +13,7 @@ export async function publicateLink(req, res) {
   try {
     //insert post na posts table:
     await postPublication(userId, url, description);
-    
+
     //insert hashtag na hashtags table:
     //array de hashtags filtradas da descrição do post:
     const hashtags = filterHashtags(description);
@@ -32,10 +33,7 @@ export async function publicateLink(req, res) {
 export async function findAllLinks(req, res) {
   const { userId } = res.locals.user;
   try {
-    const { rows } = await connection.query(
-      `SELECT u.username AS "userName", p.description, p.url, p."createdAt" FROM users u JOIN posts p ON u.id=p."userId" WHERE p."userId"=$1;`,
-      [userId]
-    );
+    const { rows } = await getAllPublications(userId);
     urlMetadata(rows[0].url)
       .then((answer) => {
         return res.status(201).send({
