@@ -1,12 +1,14 @@
 import { Router } from "express";
 import {
 	publicateLink,
-	findAllLinks,
+	findAllLinksById,
 } from "../controllers/posts.controllers.js";
 import postModelValidation from "../middlewares/post.model.validation.middleware.js";
 import { ensureAuthentication } from "../middlewares/auth.validation.middleware.js";
 
 const postsRouter = Router();
+
+
 
 postsRouter.post(
 	"/post",
@@ -15,6 +17,6 @@ postsRouter.post(
 	publicateLink
 );
 
-postsRouter.get("/posts", ensureAuthentication, findAllLinks);
+postsRouter.get("/posts", ensureAuthentication, findAllLinksById);
 
 export default postsRouter;

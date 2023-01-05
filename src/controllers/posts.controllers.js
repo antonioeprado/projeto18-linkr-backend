@@ -4,7 +4,7 @@ import filterHashtags from "../repositories/filter.hashtags.repository.js";
 import {
   postHashtag,
   postPublication,
-  getAllPublications,
+  getAllPublicationsById,
 } from "../repositories/post.repositories.js";
 
 export async function publicateLink(req, res) {
@@ -30,10 +30,10 @@ export async function publicateLink(req, res) {
 }
 
 //pega todos os posts (links) do user loggado (que enviou o token)
-export async function findAllLinks(req, res) {
+export async function findAllLinksById(req, res) {
   const { userId } = res.locals.user;
   try {
-    const { rows } = await getAllPublications(userId);
+    const { rows } = await getAllPublicationsById(userId);
     //library que pega os dados do link da publicação e envia pro front:
     urlMetadata(rows[0].url)
       .then((answer) => {
