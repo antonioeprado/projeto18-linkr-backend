@@ -19,7 +19,7 @@ router.post("/sign-up", signUpSchemaValidation, postSignUp);
 router.post("/sign-in", signInSchemaValidation, postSignIn);
 
 
-router.post("/user", ensureAuthenticated, validadeSearchQuery, findUserByName);
-router.get("/user/:id", ensureAuthenticated, getUserById);
+router.post("/user", ensureAuthentication, validadeSearchQuery, findUserByName);
+router.get("/user/:id", ensureAuthentication, getUserById);
 
 export default router;
