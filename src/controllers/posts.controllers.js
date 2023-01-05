@@ -1,19 +1,20 @@
 import connection from "../database/db.js";
 import urlMetadata from "url-metadata";
 import filterHashtags from "../repositories/filter.hashtags.repository.js";
-import postHashtag from "../repositories/post.hashtag.repository.js";
+import {
+  postHashtag,
+  postPublication,
+} from "../repositories/post.repositories.js";
 
 export async function publicateLink(req, res) {
   const { url, description } = req.body;
   const { userId } = res.locals.user;
   try {
     //insert post na posts table:
-    await connection.query(
-      `INSERT INTO posts ("userId",url,description) VALUES ($1,$2,$3);`,
-      [userId, url, description]
-    );
+    await postPublication(userId, url, description);
+    
     //insert hashtag na hashtags table:
-    //hashtags filtradas:
+    //array de hashtags filtradas da descrição do post:
     const hashtags = filterHashtags(description);
     //para cada hashtag da array hashtags, é inserida uma row hashtag na tabela hashtags
     hashtags.forEach(async (h) => {
