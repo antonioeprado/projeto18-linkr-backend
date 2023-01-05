@@ -1,4 +1,3 @@
-import connection from "../database/db.js";
 import urlMetadata from "url-metadata";
 import filterHashtags from "../repositories/filter.hashtags.repository.js";
 import {
@@ -7,6 +6,7 @@ import {
   getAllPublicationsById,
 } from "../repositories/post.repositories.js";
 
+//publica um post
 export async function publicateLink(req, res) {
   const { url, description } = req.body;
   const { userId } = res.locals.user;
@@ -27,6 +27,11 @@ export async function publicateLink(req, res) {
     res.status(500).send(err.message);
     console.log(err.message);
   }
+}
+
+//pega todos os posts, do mais recente ao mais antigo, num limite de 20 posts
+export async function findAllLinks(req,res){
+  
 }
 
 //pega todos os posts (links) do user loggado (que enviou o token)
