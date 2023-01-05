@@ -8,7 +8,8 @@ import tokenValidation from "../middlewares/token.validation.middleware.js";
 
 const postsRouter = Router();
 
-postsRouter.post("/post", postModelValidation, tokenValidation, publicateLink);
+//falta o tokenvalidation
+postsRouter.post("/post", postModelValidation, publicateLink);
 
 postsRouter.get("/posts", tokenValidation, findAllLinks);
 
