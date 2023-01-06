@@ -5,6 +5,7 @@ import {
   postHashtag,
   postPublication,
   getAllPublicationsById,
+  getAllPublications,
 } from "../repositories/post.repositories.js";
 
 //publica um post
@@ -62,26 +63,7 @@ export async function publicateLink(req, res) {
 //pega todos os posts, do mais recente ao mais antigo, num limite de 20 posts
 export async function findAllLinks(req, res) {
   try {
-    const { rows } = await connection.query(
-      `SELECT 
-      users.username AS "userName",
-      users."pictureUrl", 
-      COUNT(likes."postId") AS likes, 
-      posts.description, 
-      posts.url, 
-      metadata."linkTitle",
-      metadata."linkDescription", 
-      metadata."linkUrl", 
-      metadata."linkImg" AS "linkImage" 
-    FROM posts 
-    JOIN likes ON likes."postId"=posts.id 
-    JOIN users ON posts."userId"=users.id 
-    JOIN metadata ON posts."metaId"=metadata.id 
-    GROUP BY posts.id, users.id, metadata.id
-    ORDER BY posts.id DESC
-    LIMIT 20
-    ;`
-    );
+    const { rows } = await getAllPublications();
     const finalArr = rows.map((e) => {
       return {
         userName: e.username,
