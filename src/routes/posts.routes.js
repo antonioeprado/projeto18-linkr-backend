@@ -20,4 +20,5 @@ postsRouter.post(
 
 postsRouter.get("/user-posts", ensureAuthentication, findAllLinksById);
 
+
 export default postsRouter;
