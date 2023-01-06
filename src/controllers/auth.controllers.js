@@ -68,10 +68,10 @@ export async function postSignIn(req, res) {
 			return res.status(401).send("Senha incorreta");
 		}
 
-    await connection.query(
-      `INSERT INTO sessions ("userId") VALUES ($1) RETURNING id`,
-      [getUser.rows[0].id]
-    );
+		await connection.query(
+			`INSERT INTO sessions ("userId") VALUES ($1) RETURNING id`,
+			[getUser.rows[0].id]
+		);
 
 		const getSessionId = await connection.query(
 			`
@@ -96,7 +96,7 @@ export async function postSignIn(req, res) {
 }
 
 export async function findUserByName(req, res) {
-	const { username } = req.params;
+	const { username } = req.query;
 	try {
 		const query = await User.findByName(username);
 		if (!query.rowCount) return res.sendStatus(404);
