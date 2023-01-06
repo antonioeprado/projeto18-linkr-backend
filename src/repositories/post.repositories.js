@@ -1,4 +1,3 @@
-import { func } from "joi";
 import connection from "../database/db.js";
 
 export function postHashtag(tag) {
@@ -17,7 +16,7 @@ export function getAllPublicationsById(userId) {
     `SELECT 
     users.username AS "userName",
     users."pictureUrl", 
-    COUNT(likes."postId") AS likes, 
+    posts."likesCount",
     posts.description, 
     posts.url, 
     metadata."linkTitle",
@@ -25,11 +24,9 @@ export function getAllPublicationsById(userId) {
     metadata."linkUrl", 
     metadata."linkImg" AS "linkImage" 
   FROM posts 
-  JOIN likes ON likes."postId"=posts.id 
   JOIN users ON posts."userId"=users.id 
   JOIN metadata ON posts."metaId"=metadata.id 
   WHERE users.id=$1 
-  GROUP BY posts.id, users.id, metadata.id
   ORDER BY posts.id DESC
   LIMIT 20
   ;`,
@@ -42,7 +39,7 @@ export function getAllPublications() {
     `SELECT 
       users.username AS "userName",
       users."pictureUrl", 
-      COUNT(likes."postId") AS likes, 
+      posts."likesCount",
       posts.description, 
       posts.url, 
       metadata."linkTitle",
@@ -50,12 +47,21 @@ export function getAllPublications() {
       metadata."linkUrl", 
       metadata."linkImg" AS "linkImage" 
     FROM posts 
-    JOIN likes ON likes."postId"=posts.id 
     JOIN users ON posts."userId"=users.id 
     JOIN metadata ON posts."metaId"=metadata.id 
-    GROUP BY posts.id, users.id, metadata.id
     ORDER BY posts.id DESC
     LIMIT 20
     ;`
+  );
+}
+
+export function checkMetadata(url) {
+  return connection.query(`SELECT * FROM metadata WHERE "linkUrl"=$1`, [url]);
+}
+
+export function insertNewMetadata(title, description, url, image) {
+  return connection.query(
+    `INSERT INTO metadata ("linkTitle", "linkDescription", "linkUrl", "linkImg") VALUES ($1,$2,$3,$4) RETURNING id;`,
+    [title, description, url, image]
   );
 }

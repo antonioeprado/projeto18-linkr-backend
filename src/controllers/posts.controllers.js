@@ -1,11 +1,12 @@
 import urlMetadata from "url-metadata";
-import connection from "../database/db.js";
 import filterHashtags from "../repositories/filter.hashtags.repository.js";
 import {
   postHashtag,
   postPublication,
   getAllPublicationsById,
   getAllPublications,
+  checkMetadata,
+  insertNewMetadata,
 } from "../repositories/post.repositories.js";
 
 //publica um post
@@ -13,46 +14,44 @@ export async function publicateLink(req, res) {
   const { url, description } = req.body;
   const { userId } = res.locals.user;
   try {
-    //insere os dados na tabela metadata
+    //variavel q vai receber o metaId
     let metaId;
-    const metadataFromUrl = await connection.query(
-      `SELECT * FROM metadata WHERE "linkUrl"=$1`,
-      [url]
-    );
+    //checa se a url inserida já existe na tabela metadados
+    const metadataFromUrl = await checkMetadata(url);
+    //se não, insere novos metadados e, através do insert, retorna o id da row inserida, que é então atribuída à variável metaId, e a publicação é postada
+
+    //se sim, atribui à variável metaId o id dos metadados e posta a publicação
     if (metadataFromUrl.rows.length < 1) {
       urlMetadata(url)
         .then(async (a) => {
-          await connection.query(
-            `INSERT INTO metadata ("linkTitle", "linkDescription", "linkUrl", "linkImg") VALUES ($1,$2,$3,$4);`,
-            [a.title, a.description, a.url, a.image]
+          const { rows } = await insertNewMetadata(
+            a.title,
+            a.description,
+            a.url,
+            a.image
           );
-          const findLastMetadata = await connection.query(
-            "SELECT id FROM metadata ORDER BY id DESC LIMIT 1;"
-          );
-
-          metaId = findLastMetadata.rows[0].id;
+          metaId = rows[0].id;
           await postPublication(userId, metaId, url, description);
-          console.log(metaId);
         })
         .catch((err) => {
           console.log(err);
         });
     } else {
-      const { rows } = await connection.query(
-        `SELECT * FROM metadata WHERE "linkUrl"=$1;`,
-        [url]
-      );
-      metaId = rows[0].id;
+      metaId = metadataFromUrl.rows[0].id;
       await postPublication(userId, metaId, url, description);
     }
-    //insert hashtag na hashtags table:
-    //array de hashtags filtradas da descrição do post:
-    const hashtags = filterHashtags(description);
-    //para cada hashtag da array hashtags, é inserida uma row hashtag na tabela hashtags
-    hashtags.forEach(async (h) => {
-      await postHashtag(h);
-    });
 
+    //se não houver descrição, já é postado como nula
+    //se houver descrição, as hashtags serão filtradas e postadas na tabela hashtags
+    if (!description) {
+      return res.status(201).send("Post criado com sucesso!");
+    } else {
+      const hashtags = filterHashtags(description);
+
+      hashtags.forEach(async (h) => {
+        await postHashtag(h);
+      });
+    }
     res.status(201).send("Post criado com sucesso!");
   } catch (err) {
     res.status(500).send(err.message);
@@ -66,9 +65,9 @@ export async function findAllLinks(req, res) {
     const { rows } = await getAllPublications();
     const finalArr = rows.map((e) => {
       return {
-        userName: e.username,
+        userName: e.userName,
         userImage: e.pictureUrl,
-        likesCount: e.likes,
+        likesCount: e.likesCount,
         postDescription: e.description,
         linkInfo: {
           linkTitle: e.linkTitle,
@@ -91,9 +90,9 @@ export async function findAllLinksById(req, res) {
     const { rows } = await getAllPublicationsById(userId);
     const finalArr = rows.map((e) => {
       return {
-        userName: e.username,
+        userName: e.userName,
         userImage: e.pictureUrl,
-        likesCount: e.likes,
+        likesCount: e.likesCount,
         postDescription: e.description,
         linkInfo: {
           linkTitle: e.linkTitle,
