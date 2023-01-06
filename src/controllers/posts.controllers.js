@@ -21,6 +21,7 @@ export async function publicateLink(req, res) {
     const metadataFromUrl = await checkMetadata(url);
     //se não, insere novos metadados
     //se sim, atribui à variável metaId o id dos metadados e posta a publicação
+
     if (metadataFromUrl.rows.length < 1) {
       urlMetadata(url)
         .then(async (a) => {
@@ -31,6 +32,7 @@ export async function publicateLink(req, res) {
             a.image
           );
           metaId = rows[0].id;
+          await postPublication(userId, metaId, url, description);
         })
         .catch((err) => {
           console.log(err);
@@ -58,11 +60,13 @@ export async function publicateLink(req, res) {
 
 //pega todos os posts, do mais recente ao mais antigo, num limite de 20 posts
 export async function findAllLinks(req, res) {
+  console.log("aa")
   try {
     const { rows } = await getAllPublications();
+    console.log(rows)
     const finalArr = rows.map((e) => {
       return {
-        userName: e.username,
+        userName: e.userName,
         userImage: e.pictureUrl,
         likesCount: e.likes,
         postDescription: e.description,
@@ -87,7 +91,7 @@ export async function findAllLinksById(req, res) {
     const { rows } = await getAllPublicationsById(userId);
     const finalArr = rows.map((e) => {
       return {
-        userName: e.username,
+        userName: e.userName,
         userImage: e.pictureUrl,
         likesCount: e.likes,
         postDescription: e.description,

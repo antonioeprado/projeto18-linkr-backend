@@ -69,7 +69,3 @@ export function insertNewMetadata(title, description, url, image) {
     [title, description, url, image]
   );
 }
-
-export function findMetaDataId(url){
-
-}
