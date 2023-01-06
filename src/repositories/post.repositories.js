@@ -1,12 +1,13 @@
 import connection from "../database/db.js";
 
 export function postHashtag(tag) {
-  return connection.query(`INSERT INTO hashtags (tag) VALUES ($1);`, [tag]);
+  const newTag = tag.substring(1);
+  return connection.query(`INSERT INTO hashtags (tag) VALUES ($1) RETURNING id;`, [newTag]);
 }
 
 export function postPublication(userId, metaId, url, description) {
   return connection.query(
-    `INSERT INTO posts ("userId","metaId",url,description) VALUES ($1,$2,$3,$4);`,
+    `INSERT INTO posts ("userId","metaId",url,description) VALUES ($1,$2,$3,$4) RETURNING id;`,
     [userId, metaId, url, description]
   );
 }
