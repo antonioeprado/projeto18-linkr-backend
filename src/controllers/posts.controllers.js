@@ -6,6 +6,8 @@ import {
   postPublication,
   getAllPublicationsById,
   getAllPublications,
+  checkMetadata,
+  insertNewMetadata,
 } from "../repositories/post.repositories.js";
 
 //publica um post
@@ -13,46 +15,40 @@ export async function publicateLink(req, res) {
   const { url, description } = req.body;
   const { userId } = res.locals.user;
   try {
-    //insere os dados na tabela metadata
+    //variavel q vai receber o metaId
     let metaId;
-    const metadataFromUrl = await connection.query(
-      `SELECT * FROM metadata WHERE "linkUrl"=$1`,
-      [url]
-    );
+    //checa se a url inserida já existe na tabela metadados
+    const metadataFromUrl = await checkMetadata(url);
+    //se não, insere novos metadados
+    //se sim, atribui à variável metaId o id dos metadados e posta a publicação
     if (metadataFromUrl.rows.length < 1) {
       urlMetadata(url)
         .then(async (a) => {
-          await connection.query(
-            `INSERT INTO metadata ("linkTitle", "linkDescription", "linkUrl", "linkImg") VALUES ($1,$2,$3,$4);`,
-            [a.title, a.description, a.url, a.image]
+          const { rows } = await insertNewMetadata(
+            a.title,
+            a.description,
+            a.url,
+            a.image
           );
-          const findLastMetadata = await connection.query(
-            "SELECT id FROM metadata ORDER BY id DESC LIMIT 1;"
-          );
-
-          metaId = findLastMetadata.rows[0].id;
-          await postPublication(userId, metaId, url, description);
-          console.log(metaId);
+          metaId = rows[0].id;
         })
         .catch((err) => {
           console.log(err);
         });
     } else {
-      const { rows } = await connection.query(
-        `SELECT * FROM metadata WHERE "linkUrl"=$1;`,
-        [url]
-      );
-      metaId = rows[0].id;
+      metaId = metadataFromUrl.rows[0].id;
       await postPublication(userId, metaId, url, description);
     }
-    //insert hashtag na hashtags table:
-    //array de hashtags filtradas da descrição do post:
-    const hashtags = filterHashtags(description);
-    //para cada hashtag da array hashtags, é inserida uma row hashtag na tabela hashtags
-    hashtags.forEach(async (h) => {
-      await postHashtag(h);
-    });
 
+    if (!description) {
+      return res.status(201).send("Post criado com sucesso!");
+    } else {
+      const hashtags = filterHashtags(description);
+
+      hashtags.forEach(async (h) => {
+        await postHashtag(h);
+      });
+    }
     res.status(201).send("Post criado com sucesso!");
   } catch (err) {
     res.status(500).send(err.message);

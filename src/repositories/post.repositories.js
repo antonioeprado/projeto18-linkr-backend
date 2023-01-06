@@ -1,4 +1,3 @@
-import { func } from "joi";
 import connection from "../database/db.js";
 
 export function postHashtag(tag) {
@@ -58,4 +57,19 @@ export function getAllPublications() {
     LIMIT 20
     ;`
   );
+}
+
+export function checkMetadata(url) {
+  return connection.query(`SELECT * FROM metadata WHERE "linkUrl"=$1`, [url]);
+}
+
+export function insertNewMetadata(title, description, url, image) {
+  return connection.query(
+    `INSERT INTO metadata ("linkTitle", "linkDescription", "linkUrl", "linkImg") VALUES ($1,$2,$3,$4) RETURNING id;`,
+    [title, description, url, image]
+  );
+}
+
+export function findMetaDataId(url){
+
 }
