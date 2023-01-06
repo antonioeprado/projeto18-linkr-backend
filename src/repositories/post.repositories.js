@@ -28,7 +28,10 @@ export function getAllPublicationsById(userId) {
   JOIN users ON posts."userId"=users.id 
   JOIN metadata ON posts."metaId"=metadata.id 
   WHERE users.id=$1 
-  GROUP BY posts.id, users.id, metadata.id;`,
+  GROUP BY posts.id, users.id, metadata.id
+  ORDER BY posts.id DESC
+  LIMIT 20
+  ;`,
     [userId]
   );
 }

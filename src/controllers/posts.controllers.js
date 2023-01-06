@@ -77,9 +77,26 @@ export async function findAllLinks(req, res) {
     JOIN likes ON likes."postId"=posts.id 
     JOIN users ON posts."userId"=users.id 
     JOIN metadata ON posts."metaId"=metadata.id 
-    GROUP BY posts.id, users.id, metadata.id;`
+    GROUP BY posts.id, users.id, metadata.id
+    ORDER BY posts.id DESC
+    LIMIT 20
+    ;`
     );
-    res.status(200).send(rows);
+    const finalArr = rows.map((e) => {
+      return {
+        userName: e.username,
+        userImage: e.pictureUrl,
+        likesCount: e.likes,
+        postDescription: e.description,
+        linkInfo: {
+          linkTitle: e.linkTitle,
+          linkDescription: e.linkDescription,
+          linkUrl: e.linkUrl,
+          linkImage: e.linkImage,
+        },
+      };
+    });
+    res.send(finalArr);
   } catch (err) {
     res.status(500).send(err.message);
     console.log(err.message);
@@ -87,18 +104,18 @@ export async function findAllLinks(req, res) {
 }
 //pega todos os posts (links) do user loggado (que enviou o token)
 export async function findAllLinksById(req, res) {
-  const { userId, userPicture } = res.locals.user;
+  const { userId } = res.locals.user;
   try {
     const { rows } = await getAllPublicationsById(userId);
     const finalArr = rows.map((e) => {
       return {
         userName: e.username,
-        userImage: userPicture,
+        userImage: e.pictureUrl,
         likesCount: e.likes,
         postDescription: e.description,
         linkInfo: {
           linkTitle: e.linkTitle,
-          linkDescription: e.description,
+          linkDescription: e.linkDescription,
           linkUrl: e.linkUrl,
           linkImage: e.linkImage,
         },
