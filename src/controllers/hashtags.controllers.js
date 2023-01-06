@@ -42,7 +42,7 @@ export async function hashtags(req, res) {
             ON p.id = ph."postId"
         JOIN users u
             ON u.id = p."userId"
-        JOIN likes l
+        LEFT JOIN likes l
             ON l."postId" = p.id
         JOIN metadata mt
             ON mt.id = p."metaId"
@@ -65,9 +65,9 @@ export async function trendings(req, res) {
         JOIN hashtags h
         ON h.id = ph."tagId"
         GROUP BY h.tag ORDER BY tag_count DESC LIMIT 10`);
-        for(let i = 0; i < trends.rows.length; i++){
-            delete trends.rows[i].tag_count;
-        }
+        // for(let i = 0; i < trends.rows.length; i++){
+        //     delete trends.rows[i].tag_count;
+        // }
         res.send(trends.rows);
     } catch (err) {
         console.log(err.message);
