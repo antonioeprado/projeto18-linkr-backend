@@ -63,12 +63,11 @@ export async function publicateLink(req, res) {
 export async function findAllLinks(req, res) {
   try {
     const { rows } = await getAllPublications();
-    console.log(rows)
     const finalArr = rows.map((e) => {
       return {
         userName: e.userName,
         userImage: e.pictureUrl,
-        likesCount: e.likes,
+        likesCount: e.likesCount,
         postDescription: e.description,
         linkInfo: {
           linkTitle: e.linkTitle,
@@ -93,7 +92,7 @@ export async function findAllLinksById(req, res) {
       return {
         userName: e.userName,
         userImage: e.pictureUrl,
-        likesCount: e.likes,
+        likesCount: e.likesCount,
         postDescription: e.description,
         linkInfo: {
           linkTitle: e.linkTitle,
