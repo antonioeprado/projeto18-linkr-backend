@@ -38,13 +38,12 @@ export function signInSchemaValidation(req, res, next) {
 	next();
 }
 export async function ensureAuthentication(req, res, next) {
-  const authorization = req.headers.authorization;
-  const token = authorization?.replace("Bearer ", "");
+	const authorization = req.headers.authorization;
+	const token = authorization?.replace("Bearer ", "");
 
 	if (!token) {
 		return res.sendStatus(401);
 	}
-
 
 	try {
 		const { userId, userPicture } = jwt.verify(token, process.env.JWT_SECRET);
@@ -59,7 +58,8 @@ export async function ensureAuthentication(req, res, next) {
 }
 
 export function validadeSearchQuery(req, res, next) {
-	if (validateBySchema(req.body, searchBoxSchema, res)) {
+	const username = req.query;
+	if (validateBySchema(username, searchBoxSchema, res)) {
 		next();
 	}
 }
