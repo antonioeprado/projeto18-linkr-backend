@@ -1,4 +1,5 @@
 import urlMetadata from "url-metadata";
+import connection from "../database/db.js";
 import filterHashtags from "../repositories/filter.hashtags.repository.js";
 import {
   postHashtag,
@@ -16,6 +17,8 @@ export async function publicateLink(req, res) {
   try {
     //variavel q vai receber o metaId
     let metaId;
+    let postId;
+    let tagId;
     //checa se a url inserida já existe na tabela metadados
     const metadataFromUrl = await checkMetadata(url);
     //se não, insere novos metadados e, através do insert, retorna o id da row inserida, que é então atribuída à variável metaId, e a publicação é postada
@@ -31,14 +34,16 @@ export async function publicateLink(req, res) {
             a.image
           );
           metaId = rows[0].id;
-          await postPublication(userId, metaId, url, description);
+          const newPostId = await postPublication(userId, metaId, url, description);
+          postId = newPostId.rows[0].id;
         })
         .catch((err) => {
           console.log(err);
         });
     } else {
       metaId = metadataFromUrl.rows[0].id;
-      await postPublication(userId, metaId, url, description);
+      const newPostId = await postPublication(userId, metaId, url, description);
+      postId = newPostId.rows[0].id;
     }
 
     //se não houver descrição, já é postado como nula
@@ -49,7 +54,9 @@ export async function publicateLink(req, res) {
       const hashtags = filterHashtags(description);
 
       hashtags.forEach(async (h) => {
-        await postHashtag(h);
+        let { rows } = await postHashtag(h);
+        tagId = rows[0].id;
+        await connection.query(`INSERT INTO posts_hashtags ("postId", "tagId") VALUES ($1, $2)`, [postId, tagId]);
       });
     }
     res.status(201).send("Post criado com sucesso!");

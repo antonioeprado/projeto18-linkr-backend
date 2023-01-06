@@ -51,32 +51,6 @@ export async function hashtags(req, res) {
            `,
             [hashtags]
         );
-        // const urls = hashtagClick.rows;
-        // console.log(urls);
-        // const dados = urls.map((o)=> {return o.url});
-        // console.log(dados);
-        // // for(i = 0; i < dados.length; i++){
-
-        // // }
-        // const dado = await urlMetadata();
-        // console.log(dado);
-        // const postFiltred = hashtagClick.rows.map((p) => { 
-        //     return(
-        //          {
-        //             username: p.username,
-        //             pictureUrl: p.pictureUrl,
-        //             url: p.url,
-        //             description: p.description,
-        //             likes: p.likes,
-        //             linkInfo:{
-        //                 title: dados.title,
-        //                 description: dados.description,
-        //                 url: dados.url,
-        //                 image: dados.image
-        //             }
-        //         }
-        //     )
-        // });
         res.send(hashtagClick.rows);
     } catch (err) {
         console.log(err);
@@ -85,7 +59,15 @@ export async function hashtags(req, res) {
 
 export async function trendings(req, res) {
     try {
-        const trends = await connection.query(`SELECT tag FROM hashtags`);
+        const trends = await connection.query(`
+        SELECT COUNT("tagId") AS tag_count, tag
+        FROM posts_hashtags ph
+        JOIN hashtags h
+        ON h.id = ph."tagId"
+        GROUP BY h.tag ORDER BY tag_count DESC LIMIT 10`);
+        for(let i = 0; i < trends.rows.length; i++){
+            delete trends.rows[i].tag_count;
+        }
         res.send(trends.rows);
     } catch (err) {
         console.log(err.message);
