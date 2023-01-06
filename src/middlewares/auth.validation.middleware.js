@@ -58,7 +58,8 @@ export async function ensureAuthentication(req, res, next) {
 }
 
 export function validadeSearchQuery(req, res, next) {
-	if (validateBySchema(req.params, searchBoxSchema, res)) {
+	const username = req.query;
+	if (validateBySchema(username, searchBoxSchema, res)) {
 		next();
 	}
 }
