@@ -68,8 +68,6 @@ export async function postSignIn(req, res) {
     SELECT users.email FROM users
     `);
 
-    console.log("getOnlyUser:", findAllUsersEmails.rows);
-
     const compareUserEmail = findAllUsersEmails.rows.find(
       (item) => item.email === email
     );
