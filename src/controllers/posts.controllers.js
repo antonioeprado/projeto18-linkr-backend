@@ -1,5 +1,4 @@
 import urlMetadata from "url-metadata";
-import connection from "../database/db.js";
 import filterHashtags from "../repositories/filter.hashtags.repository.js";
 import {
   postHashtag,
@@ -19,9 +18,9 @@ export async function publicateLink(req, res) {
     let metaId;
     //checa se a url inserida já existe na tabela metadados
     const metadataFromUrl = await checkMetadata(url);
-    //se não, insere novos metadados
-    //se sim, atribui à variável metaId o id dos metadados e posta a publicação
+    //se não, insere novos metadados e, através do insert, retorna o id da row inserida, que é então atribuída à variável metaId, e a publicação é postada
 
+    //se sim, atribui à variável metaId o id dos metadados e posta a publicação
     if (metadataFromUrl.rows.length < 1) {
       urlMetadata(url)
         .then(async (a) => {
@@ -42,6 +41,8 @@ export async function publicateLink(req, res) {
       await postPublication(userId, metaId, url, description);
     }
 
+    //se não houver descrição, já é postado como nula
+    //se houver descrição, as hashtags serão filtradas e postadas na tabela hashtags
     if (!description) {
       return res.status(201).send("Post criado com sucesso!");
     } else {
@@ -60,7 +61,6 @@ export async function publicateLink(req, res) {
 
 //pega todos os posts, do mais recente ao mais antigo, num limite de 20 posts
 export async function findAllLinks(req, res) {
-  console.log("aa")
   try {
     const { rows } = await getAllPublications();
     console.log(rows)
