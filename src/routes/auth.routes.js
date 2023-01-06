@@ -17,7 +17,12 @@ const router = Router();
 router.post("/sign-up", signUpSchemaValidation, postSignUp);
 router.post("/sign-in", signInSchemaValidation, postSignIn);
 
-router.post("/user", ensureAuthentication, validadeSearchQuery, findUserByName);
+router.get(
+	"/user/:username",
+	ensureAuthentication,
+	validadeSearchQuery,
+	findUserByName
+);
 router.get("/user/:id", ensureAuthentication, getUserById);
 
 export default router;
