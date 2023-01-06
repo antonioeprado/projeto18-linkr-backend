@@ -12,9 +12,38 @@ export async function publicateLink(req, res) {
   const { url, description } = req.body;
   const { userId } = res.locals.user;
   try {
-    //insert post na posts table:
-    await postPublication(userId, url, description);
+    //insere os dados na tabela metadata
+    let metaId;
+    const metadataFromUrl = await connection.query(
+      `SELECT * FROM metadata WHERE "linkUrl"=$1`,
+      [url]
+    );
+    if (metadataFromUrl.rows.length < 1) {
+      urlMetadata(url)
+        .then(async (a) => {
+          await connection.query(
+            `INSERT INTO metadata ("linkTitle", "linkDescription", "linkUrl", "linkImg") VALUES ($1,$2,$3,$4);`,
+            [a.title, a.description, a.url, a.image]
+          );
+          const findLastMetadata = await connection.query(
+            "SELECT id FROM metadata ORDER BY id DESC LIMIT 1;"
+          );
 
+          metaId = findLastMetadata.rows[0].id;
+          await postPublication(userId, metaId, url, description);
+          console.log(metaId);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      const { rows } = await connection.query(
+        `SELECT * FROM metadata WHERE "linkUrl"=$1;`,
+        [url]
+      );
+      metaId = rows[0].id;
+      await postPublication(userId, metaId, url, description);
+    }
     //insert hashtag na hashtags table:
     //array de hashtags filtradas da descrição do post:
     const hashtags = filterHashtags(description);
@@ -34,7 +63,21 @@ export async function publicateLink(req, res) {
 export async function findAllLinks(req, res) {
   try {
     const { rows } = await connection.query(
-      `SELECT * FROM posts ORDER BY id DESC LIMIT 20;`
+      `SELECT 
+      users.username AS "userName",
+      users."pictureUrl", 
+      COUNT(likes."postId") AS likes, 
+      posts.description, 
+      posts.url, 
+      metadata."linkTitle",
+      metadata."linkDescription", 
+      metadata."linkUrl", 
+      metadata."linkImg" AS "linkImage" 
+    FROM posts 
+    JOIN likes ON likes."postId"=posts.id 
+    JOIN users ON posts."userId"=users.id 
+    JOIN metadata ON posts."metaId"=metadata.id 
+    GROUP BY posts.id, users.id, metadata.id;`
     );
     res.status(200).send(rows);
   } catch (err) {
@@ -42,29 +85,26 @@ export async function findAllLinks(req, res) {
     console.log(err.message);
   }
 }
-
 //pega todos os posts (links) do user loggado (que enviou o token)
 export async function findAllLinksById(req, res) {
-  const { userId } = res.locals.user;
+  const { userId, userPicture } = res.locals.user;
   try {
     const { rows } = await getAllPublicationsById(userId);
-    //library que pega os dados do link da publicação e envia pro front:
-    urlMetadata(rows[0].url)
-      .then((answer) => {
-        return res.status(201).send({
-          userName: rows[0].userName,
-          postDescription: rows[0].description,
-          linkInfo: {
-            title: answer.title,
-            description: answer.description,
-            url: answer.url,
-            image: answer.image,
-          },
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    const finalArr = rows.map((e) => {
+      return {
+        userName: e.username,
+        userImage: userPicture,
+        likesCount: e.likes,
+        postDescription: e.description,
+        linkInfo: {
+          linkTitle: e.linkTitle,
+          linkDescription: e.description,
+          linkUrl: e.linkUrl,
+          linkImage: e.linkImage,
+        },
+      };
+    });
+    res.send(finalArr);
   } catch (err) {
     res.status(500).send(err.message);
     console.log(err.message);
