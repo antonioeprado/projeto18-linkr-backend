@@ -1,4 +1,3 @@
-import { func } from "joi";
 import connection from "../database/db.js";
 
 export function postHashtag(tag) {
