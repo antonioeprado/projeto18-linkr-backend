@@ -14,10 +14,11 @@ export function postPublication(userId, metaId, url, description) {
 
 export function getAllPublicationsById(userId) {
   return connection.query(
-    `SELECT 
-    users.username AS "userName",
+    `
+  SELECT 
+    users.username AS "userName", 
     users."pictureUrl", 
-    posts."likesCount",
+    COUNT(likes.id) AS likes,
     posts.description, 
     posts.url, 
     metadata."linkTitle",
@@ -27,7 +28,9 @@ export function getAllPublicationsById(userId) {
   FROM posts 
   JOIN users ON posts."userId"=users.id 
   JOIN metadata ON posts."metaId"=metadata.id 
+  LEFT JOIN likes ON likes."postId"=posts.id
   WHERE users.id=$1 
+  GROUP BY users.id, posts.id, metadata.id 
   ORDER BY posts.id DESC
   LIMIT 20
   ;`,
@@ -40,7 +43,7 @@ export function getAllPublications() {
     `SELECT 
       users.username AS "userName",
       users."pictureUrl", 
-      posts."likesCount",
+      COUNT(likes.id) AS likes,
       posts.description, 
       posts.url, 
       metadata."linkTitle",
@@ -50,6 +53,8 @@ export function getAllPublications() {
     FROM posts 
     JOIN users ON posts."userId"=users.id 
     JOIN metadata ON posts."metaId"=metadata.id 
+    LEFT JOIN likes ON likes."postId"=posts.id
+    GROUP BY users.id, posts.id, metadata.id
     ORDER BY posts.id DESC
     LIMIT 20
     ;`

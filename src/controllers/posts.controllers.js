@@ -74,7 +74,7 @@ export async function findAllLinks(req, res) {
       return {
         userName: e.userName,
         userImage: e.pictureUrl,
-        likesCount: e.likesCount,
+        likesCount: e.likes,
         postDescription: e.description,
         linkInfo: {
           linkTitle: e.linkTitle,
@@ -99,7 +99,7 @@ export async function findAllLinksById(req, res) {
       return {
         userName: e.userName,
         userImage: e.pictureUrl,
-        likesCount: e.likesCount,
+        likesCount: e.likes,
         postDescription: e.description,
         linkInfo: {
           linkTitle: e.linkTitle,
