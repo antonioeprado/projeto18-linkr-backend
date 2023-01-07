@@ -13,13 +13,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-
 app.use(router);
 app.use(authRouter);
 app.use(likesRouter)
 app.use(hashtagsRoutes);
 app.use(postRouter);
-
 
 const PORT = 4000 || process.env.PORT;
 app.listen(PORT, () => {
