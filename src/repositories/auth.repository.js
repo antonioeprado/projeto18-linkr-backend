@@ -43,6 +43,7 @@ export async function getUserByEmail(email) {
     `SELECT * FROM users WHERE email = $1`,
     [email]
   );
+  console.log("email:", existingEmail.rows[0]);
   return existingEmail;
 }
 
@@ -61,5 +62,26 @@ export async function insertNewUser(
   return await connection.query(
     `INSERT INTO users (email, password, username, "pictureUrl") VALUES ($1, $2, $3, $4)`,
     [email, passwordHashed, username, pictureUrl]
+  );
+}
+
+export async function getAllUsersEmails() {
+  return await connection.query(`
+	  SELECT users.email FROM users
+	  `);
+}
+
+export async function createSessionByUserId(getUser) {
+  await connection.query(
+    `INSERT INTO sessions ("userId") VALUES ($1) RETURNING id`,
+    [getUser.rows[0].id]
+  );
+}
+
+export async function getSessionsByUserId(getUser) {
+  return await connection.query(
+    `
+	  SELECT * FROM sessions WHERE "userId" = $1`,
+    [getUser.rows[0].id]
   );
 }

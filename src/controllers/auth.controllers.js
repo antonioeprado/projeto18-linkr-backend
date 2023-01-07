@@ -1,7 +1,9 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import connection from "../database/db.js";
 import {
+  createSessionByUserId,
+  getAllUsersEmails,
+  getSessionsByUserId,
   getUserByEmail,
   getUserByUsername,
   insertNewUser,
@@ -14,7 +16,7 @@ export async function postSignUp(req, res) {
   const passwordHashed = bcrypt.hashSync(password, 10);
 
   try {
-    const existingEmail = getUserByEmail(email);
+    const existingEmail = await getUserByEmail(email);
 
     if (existingEmail.rowCount > 0) {
       return res
@@ -64,14 +66,9 @@ export async function postSignIn(req, res) {
   const { email, password } = req.body;
 
   try {
-    const getUser = await connection.query(
-      `SELECT * FROM users WHERE email = $1`,
-      [email]
-    );
+    const getUser = await getUserByEmail(email);
 
-    const findAllUsersEmails = await connection.query(`
-    SELECT users.email FROM users
-    `);
+    const findAllUsersEmails = await getAllUsersEmails();
 
     const compareUserEmail = findAllUsersEmails.rows.find(
       (item) => item.email === email
@@ -85,16 +82,9 @@ export async function postSignIn(req, res) {
       return res.status(401).send("Senha incorreta");
     }
 
-    await connection.query(
-      `INSERT INTO sessions ("userId") VALUES ($1) RETURNING id`,
-      [getUser.rows[0].id]
-    );
+    await createSessionByUserId(getUser);
 
-    const getSessionId = await connection.query(
-      `
-    SELECT * FROM sessions WHERE "userId" = $1`,
-      [getUser.rows[0].id]
-    );
+    const getSessionId = await getSessionsByUserId(getUser);
 
     const payload = {
       userId: getUser.rows[0].id,
