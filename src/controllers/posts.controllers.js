@@ -1,11 +1,11 @@
-import urlMetadata from "url-metadata";
-import connection from "../database/db.js";
 import filterHashtags from "../repositories/filter.hashtags.repository.js";
 import {
   postHashtag,
   postPublication,
   getAllPublicationsById,
   getAllPublications,
+  insertPostHashtag,
+  checkHashtag,
 } from "../repositories/post.repositories.js";
 
 //publica um post
@@ -33,14 +33,21 @@ export async function publicateLink(req, res) {
       const hashtags = filterHashtags(description);
       //insere as hashtags na tabela hashtags
       hashtags.forEach(async (h) => {
-        const { rows } = await postHashtag(h);
-        await connection.query(
-          `INSERT INTO posts_hashtags ("postId", "tagId") VALUES ($1, $2)`,
-          [returnPostId.rows[0].id, rows[0].id]
-        );
+        //verifica se a hashtag já existe
+        const checkHashtagExists = await checkHashtag(h);
+        //se já existe, insere na tabela posts_hashtags com o id da hashtag existente
+        //se não existe, posta a nova hashtag na tabela hashtags e depois insere na tabela posts_hashtags com o id da nova hashtag
+        if (checkHashtagExists.rows.length > 0) {
+          await insertPostHashtag(
+            returnPostId.rows[0].id,
+            checkHashtagExists.rows[0].id
+          );
+        } else {
+          const { rows } = await postHashtag(h);
+          await insertPostHashtag(returnPostId.rows[0].id, rows[0].id);
+        }
       });
     }
-
     res.status(201).send("Post criado com sucesso!");
   } catch (err) {
     res.status(500).send(err.message);

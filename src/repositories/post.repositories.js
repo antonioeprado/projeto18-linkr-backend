@@ -2,7 +2,10 @@ import connection from "../database/db.js";
 
 export function postHashtag(tag) {
   const newTag = tag.substring(1);
-  return connection.query(`INSERT INTO hashtags (tag) VALUES ($1) RETURNING id;`, [newTag]);
+  return connection.query(
+    `INSERT INTO hashtags (tag) VALUES ($1) RETURNING id;`,
+    [newTag]
+  );
 }
 
 export function postPublication(userId, metaId, url, description) {
@@ -70,4 +73,15 @@ export function insertNewMetadata(title, description, url, image) {
     `INSERT INTO metadata ("linkTitle", "linkDescription", "linkUrl", "linkImg") VALUES ($1,$2,$3,$4) RETURNING id;`,
     [title, description, url, image]
   );
+}
+
+export function insertPostHashtag(postId, tagId) {
+  return connection.query(
+    `INSERT INTO posts_hashtags ("postId", "tagId") VALUES ($1, $2)`,
+    [postId, tagId]
+  );
+}
+
+export function checkHashtag(hashtag) {
+  return connection.query(`SELECT * FROM hashtags WHERE tag=$1`, [hashtag]);
 }
