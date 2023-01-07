@@ -46,7 +46,7 @@ export async function getUserById(req, res) {
 	const { id } = req.params;
 	try {
 		const query = await User.findById(id);
-		const user = query.rows;
+		const user = query.rows[0];
 		res.status(200).send(user);
 	} catch (error) {
 		console.log(`Error trying to find user with id: ${id}`);
