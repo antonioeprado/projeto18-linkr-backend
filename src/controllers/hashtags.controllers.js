@@ -6,6 +6,7 @@ export async function hashtags(req, res) {
     // const token = req.headers.authorization?.replace("Bearer ", "");
     // const secretKey = process.env.JWT_SECRET;
     const { hashtags } = req.params;
+    console.log(hashtags)
     // if (!token) {
     //     return res.sendStatus(401);
     // }
@@ -51,6 +52,7 @@ export async function hashtags(req, res) {
            `,
             [hashtags]
         );
+        console.log(hashtagClick.rows)
         res.send(hashtagClick.rows);
     } catch (err) {
         console.log(err);

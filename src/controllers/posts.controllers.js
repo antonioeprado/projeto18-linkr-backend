@@ -6,59 +6,41 @@ import {
   postPublication,
   getAllPublicationsById,
   getAllPublications,
-  checkMetadata,
-  insertNewMetadata,
 } from "../repositories/post.repositories.js";
 
 //publica um post
 export async function publicateLink(req, res) {
   const { url, description } = req.body;
   const { userId } = res.locals.user;
+  const metaId = res.locals.metaId;
+
   try {
-    //variavel q vai receber o metaId
-    let metaId;
-    let postId;
-    let tagId;
-    //checa se a url inserida já existe na tabela metadados
-    const metadataFromUrl = await checkMetadata(url);
-    //se não, insere novos metadados e, através do insert, retorna o id da row inserida, que é então atribuída à variável metaId, e a publicação é postada
-
-    //se sim, atribui à variável metaId o id dos metadados e posta a publicação
-    if (metadataFromUrl.rows.length < 1) {
-      urlMetadata(url)
-        .then(async (a) => {
-          const { rows } = await insertNewMetadata(
-            a.title,
-            a.description,
-            a.url,
-            a.image
-          );
-          metaId = rows[0].id;
-          const newPostId = await postPublication(userId, metaId, url, description);
-          postId = newPostId.rows[0].id;
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } else {
-      metaId = metadataFromUrl.rows[0].id;
-      const newPostId = await postPublication(userId, metaId, url, description);
-      postId = newPostId.rows[0].id;
-    }
-
     //se não houver descrição, já é postado como nula
     //se houver descrição, as hashtags serão filtradas e postadas na tabela hashtags
     if (!description) {
+      await postPublication(userId, metaId, url, description);
       return res.status(201).send("Post criado com sucesso!");
-    } else {
+    }
+    if (description) {
+      //posta a publi e retorna o id da publi
+      const returnPostId = await postPublication(
+        userId,
+        metaId,
+        url,
+        description
+      );
+      //filtra as hashtags da descriçao
       const hashtags = filterHashtags(description);
-
+      //insere as hashtags na tabela hashtags
       hashtags.forEach(async (h) => {
-        let { rows } = await postHashtag(h);
-        tagId = rows[0].id;
-        await connection.query(`INSERT INTO posts_hashtags ("postId", "tagId") VALUES ($1, $2)`, [postId, tagId]);
+        const { rows } = await postHashtag(h);
+        await connection.query(
+          `INSERT INTO posts_hashtags ("postId", "tagId") VALUES ($1, $2)`,
+          [returnPostId.rows[0].id, rows[0].id]
+        );
       });
     }
+
     res.status(201).send("Post criado com sucesso!");
   } catch (err) {
     res.status(500).send(err.message);
