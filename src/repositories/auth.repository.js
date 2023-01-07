@@ -12,20 +12,27 @@ export const User = {
 			`
 			SELECT
 				u.username,
+				u."pictureUrl",
 				ARRAY_TO_JSON(
 					ARRAY_AGG(
 						JSON_BUILD_OBJECT(
 							'id', p.id,
 							'url', p.url,
-							'description', p.description
+							'description', p.description,
+							'linkTitle', mt."linkTitle",
+							'linkDescription', mt."linkDescription",
+							'linkUrl', mt."linkUrl",
+							'linkImg', mt."linkImg"
 						)
 					)
 				) AS posts
 			FROM users u
 			JOIN posts p
-				ON u.id = p."userId"
-			WHERE u.id=$1
-			GROUP BY u.id
+				ON p."userId" = u.id
+			JOIN metadata mt
+				ON mt.id = p."metaId"
+			WHERE u.id = $1
+			GROUP BY u.id;
 			`,
 			[id]
 		);
