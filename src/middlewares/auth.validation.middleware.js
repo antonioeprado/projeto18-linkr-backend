@@ -46,9 +46,9 @@ export async function ensureAuthentication(req, res, next) {
 	}
 
 	try {
-		const { userId, userPicture } = jwt.verify(token, process.env.JWT_SECRET);
+		const { userId, userPicture, sessionId } = jwt.verify(token, process.env.JWT_SECRET);
 
-		res.locals.user = { userId, userPicture };
+		res.locals.user = { userId, userPicture, sessionId };
 
 		next();
 	} catch (err) {

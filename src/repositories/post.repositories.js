@@ -2,7 +2,14 @@ import connection from "../database/db.js";
 
 export function postHashtag(tag) {
   const newTag = tag.substring(1);
-  return connection.query(`INSERT INTO hashtags (tag) VALUES ($1) RETURNING id;`, [newTag]);
+  // const tagExist = connection.query(`SELECT * FROM hashtags WHERE tag = $1`, [tag]);
+  // console.log(tagExist);
+  // if (!tagExist) {
+  //   return connection.query(`INSERT INTO hashtags (tag) VALUES ($1) RETURNING id;`, [newTag]);
+  // } else {
+    return connection.query(`SELECT * FROM hashtags WHERE tag = $1 RETURNING id;`, [newTag]);
+  // }
+
 }
 
 export function postPublication(userId, metaId, url, description) {

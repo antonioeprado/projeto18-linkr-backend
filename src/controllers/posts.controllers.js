@@ -36,6 +36,7 @@ export async function publicateLink(req, res) {
           metaId = rows[0].id;
           const newPostId = await postPublication(userId, metaId, url, description);
           postId = newPostId.rows[0].id;
+          console.log(postId);
         })
         .catch((err) => {
           console.log(err);
@@ -44,6 +45,7 @@ export async function publicateLink(req, res) {
       metaId = metadataFromUrl.rows[0].id;
       const newPostId = await postPublication(userId, metaId, url, description);
       postId = newPostId.rows[0].id;
+      console.log(newPostId);
     }
 
     //se não houver descrição, já é postado como nula
