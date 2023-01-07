@@ -1,58 +1,53 @@
-import urlMetadata from "url-metadata";
-import connection from "../database/db.js";
 import filterHashtags from "../repositories/filter.hashtags.repository.js";
 import {
   postHashtag,
   postPublication,
   getAllPublicationsById,
   getAllPublications,
+  insertPostHashtag,
+  checkHashtag,
 } from "../repositories/post.repositories.js";
 
 //publica um post
 export async function publicateLink(req, res) {
   const { url, description } = req.body;
   const { userId } = res.locals.user;
+  const metaId = res.locals.metaId;
+
   try {
-    //insere os dados na tabela metadata
-    let metaId;
-    const metadataFromUrl = await connection.query(
-      `SELECT * FROM metadata WHERE "linkUrl"=$1`,
-      [url]
-    );
-    if (metadataFromUrl.rows.length < 1) {
-      urlMetadata(url)
-        .then(async (a) => {
-          await connection.query(
-            `INSERT INTO metadata ("linkTitle", "linkDescription", "linkUrl", "linkImg") VALUES ($1,$2,$3,$4);`,
-            [a.title, a.description, a.url, a.image]
-          );
-          const findLastMetadata = await connection.query(
-            "SELECT id FROM metadata ORDER BY id DESC LIMIT 1;"
-          );
-
-          metaId = findLastMetadata.rows[0].id;
-          await postPublication(userId, metaId, url, description);
-          console.log(metaId);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } else {
-      const { rows } = await connection.query(
-        `SELECT * FROM metadata WHERE "linkUrl"=$1;`,
-        [url]
-      );
-      metaId = rows[0].id;
+    //se não houver descrição, já é postado como nula
+    //se houver descrição, as hashtags serão filtradas e postadas na tabela hashtags
+    if (!description) {
       await postPublication(userId, metaId, url, description);
+      return res.status(201).send("Post criado com sucesso!");
     }
-    //insert hashtag na hashtags table:
-    //array de hashtags filtradas da descrição do post:
-    const hashtags = filterHashtags(description);
-    //para cada hashtag da array hashtags, é inserida uma row hashtag na tabela hashtags
-    hashtags.forEach(async (h) => {
-      await postHashtag(h);
-    });
-
+    if (description) {
+      //posta a publi e retorna o id da publi
+      const returnPostId = await postPublication(
+        userId,
+        metaId,
+        url,
+        description
+      );
+      //filtra as hashtags da descriçao
+      const hashtags = filterHashtags(description);
+      //insere as hashtags na tabela hashtags
+      hashtags.forEach(async (h) => {
+        //verifica se a hashtag já existe
+        const checkHashtagExists = await checkHashtag(h);
+        //se já existe, insere na tabela posts_hashtags com o id da hashtag existente
+        //se não existe, posta a nova hashtag na tabela hashtags e depois insere na tabela posts_hashtags com o id da nova hashtag
+        if (checkHashtagExists.rows.length > 0) {
+          await insertPostHashtag(
+            returnPostId.rows[0].id,
+            checkHashtagExists.rows[0].id
+          );
+        } else {
+          const { rows } = await postHashtag(h);
+          await insertPostHashtag(returnPostId.rows[0].id, rows[0].id);
+        }
+      });
+    }
     res.status(201).send("Post criado com sucesso!");
   } catch (err) {
     res.status(500).send(err.message);
@@ -64,9 +59,11 @@ export async function publicateLink(req, res) {
 export async function findAllLinks(req, res) {
   try {
     const { rows } = await getAllPublications();
+    console.log(rows);
     const finalArr = rows.map((e) => {
       return {
-        userName: e.username,
+        postId: e.postId,
+        userName: e.userName,
         userImage: e.pictureUrl,
         likesCount: e.likes,
         postDescription: e.description,
@@ -91,7 +88,8 @@ export async function findAllLinksById(req, res) {
     const { rows } = await getAllPublicationsById(userId);
     const finalArr = rows.map((e) => {
       return {
-        userName: e.username,
+        postId: e.postId,
+        userName: e.userName,
         userImage: e.pictureUrl,
         likesCount: e.likes,
         postDescription: e.description,

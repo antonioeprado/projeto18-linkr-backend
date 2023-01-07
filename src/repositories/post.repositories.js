@@ -1,23 +1,28 @@
-import { func } from "joi";
 import connection from "../database/db.js";
 
 export function postHashtag(tag) {
-  return connection.query(`INSERT INTO hashtags (tag) VALUES ($1);`, [tag]);
+  const newTag = tag.substring(1);
+  return connection.query(
+    `INSERT INTO hashtags (tag) VALUES ($1) RETURNING id;`,
+    [newTag]
+  );
 }
 
 export function postPublication(userId, metaId, url, description) {
   return connection.query(
-    `INSERT INTO posts ("userId","metaId",url,description) VALUES ($1,$2,$3,$4);`,
+    `INSERT INTO posts ("userId","metaId",url,description) VALUES ($1,$2,$3,$4) RETURNING id;`,
     [userId, metaId, url, description]
   );
 }
 
 export function getAllPublicationsById(userId) {
   return connection.query(
-    `SELECT 
-    users.username AS "userName",
+    `
+  SELECT 
+    users.username AS "userName", 
     users."pictureUrl", 
-    COUNT(likes."postId") AS likes, 
+    COUNT(likes.id) AS likes,
+    posts.id AS "postId",
     posts.description, 
     posts.url, 
     metadata."linkTitle",
@@ -25,11 +30,11 @@ export function getAllPublicationsById(userId) {
     metadata."linkUrl", 
     metadata."linkImg" AS "linkImage" 
   FROM posts 
-  JOIN likes ON likes."postId"=posts.id 
   JOIN users ON posts."userId"=users.id 
   JOIN metadata ON posts."metaId"=metadata.id 
+  LEFT JOIN likes ON likes."postId"=posts.id
   WHERE users.id=$1 
-  GROUP BY posts.id, users.id, metadata.id
+  GROUP BY users.id, posts.id, metadata.id 
   ORDER BY posts.id DESC
   LIMIT 20
   ;`,
@@ -42,7 +47,8 @@ export function getAllPublications() {
     `SELECT 
       users.username AS "userName",
       users."pictureUrl", 
-      COUNT(likes."postId") AS likes, 
+      COUNT(likes.id) AS likes,
+      posts.id AS "postId",
       posts.description, 
       posts.url, 
       metadata."linkTitle",
@@ -50,12 +56,34 @@ export function getAllPublications() {
       metadata."linkUrl", 
       metadata."linkImg" AS "linkImage" 
     FROM posts 
-    JOIN likes ON likes."postId"=posts.id 
     JOIN users ON posts."userId"=users.id 
     JOIN metadata ON posts."metaId"=metadata.id 
-    GROUP BY posts.id, users.id, metadata.id
+    LEFT JOIN likes ON likes."postId"=posts.id
+    GROUP BY users.id, posts.id, metadata.id
     ORDER BY posts.id DESC
     LIMIT 20
     ;`
   );
+}
+
+export function checkMetadata(url) {
+  return connection.query(`SELECT * FROM metadata WHERE "linkUrl"=$1`, [url]);
+}
+
+export function insertNewMetadata(title, description, url, image) {
+  return connection.query(
+    `INSERT INTO metadata ("linkTitle", "linkDescription", "linkUrl", "linkImg") VALUES ($1,$2,$3,$4) RETURNING id;`,
+    [title, description, url, image]
+  );
+}
+
+export function insertPostHashtag(postId, tagId) {
+  return connection.query(
+    `INSERT INTO posts_hashtags ("postId", "tagId") VALUES ($1, $2)`,
+    [postId, tagId]
+  );
+}
+
+export function checkHashtag(hashtag) {
+  return connection.query(`SELECT * FROM hashtags WHERE tag=$1`, [hashtag]);
 }

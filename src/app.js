@@ -4,6 +4,7 @@ import router from "./routes/auth.routes.js";
 import hashtagsRoutes from "./routes/hashtags.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import postRouter from "./routes/posts.routes.js";
+import likesRouter from "./routes/likes.routes.js";
 
 import cors from "cors";
 dotenv.config();
@@ -14,9 +15,9 @@ app.use(cors());
 
 app.use(router);
 app.use(authRouter);
+app.use(likesRouter)
 app.use(hashtagsRoutes);
 app.use(postRouter);
-
 
 const PORT = 4000 || process.env.PORT;
 app.listen(PORT, () => {
