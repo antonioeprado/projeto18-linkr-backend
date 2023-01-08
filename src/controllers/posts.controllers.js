@@ -1,64 +1,51 @@
-import urlMetadata from "url-metadata";
-import connection from "../database/db.js";
 import filterHashtags from "../repositories/filter.hashtags.repository.js";
 import {
   postHashtag,
   postPublication,
   getAllPublicationsById,
   getAllPublications,
-  checkMetadata,
-  insertNewMetadata,
+  insertPostHashtag,
+  checkHashtag,
 } from "../repositories/post.repositories.js";
 
 //publica um post
 export async function publicateLink(req, res) {
   const { url, description } = req.body;
   const { userId } = res.locals.user;
+  const metaId = res.locals.metaId;
+
   try {
-    //variavel q vai receber o metaId
-    let metaId;
-    let postId;
-    let tagId;
-    //checa se a url inserida já existe na tabela metadados
-    const metadataFromUrl = await checkMetadata(url);
-    //se não, insere novos metadados e, através do insert, retorna o id da row inserida, que é então atribuída à variável metaId, e a publicação é postada
-
-    //se sim, atribui à variável metaId o id dos metadados e posta a publicação
-    if (metadataFromUrl.rows.length < 1) {
-      urlMetadata(url)
-        .then(async (a) => {
-          const { rows } = await insertNewMetadata(
-            a.title,
-            a.description,
-            a.url,
-            a.image
-          );
-          metaId = rows[0].id;
-          const newPostId = await postPublication(userId, metaId, url, description);
-          postId = newPostId.rows[0].id;
-          console.log(postId);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } else {
-      metaId = metadataFromUrl.rows[0].id;
-      const newPostId = await postPublication(userId, metaId, url, description);
-      postId = newPostId.rows[0].id;
-      console.log(newPostId);
-    }
-
     //se não houver descrição, já é postado como nula
     //se houver descrição, as hashtags serão filtradas e postadas na tabela hashtags
     if (!description) {
+      await postPublication(userId, metaId, url, description);
       return res.status(201).send("Post criado com sucesso!");
-    } else {
+    }
+    if (description) {
+      //posta a publi e retorna o id da publi
+      const returnPostId = await postPublication(
+        userId,
+        metaId,
+        url,
+        description
+      );
+      //filtra as hashtags da descriçao
       const hashtags = filterHashtags(description);
-
+      //insere as hashtags na tabela hashtags
       hashtags.forEach(async (h) => {
-        let { rows } = await postHashtag(h);
-        tagId = rows[0].id;
-        await connection.query(`INSERT INTO posts_hashtags ("postId", "tagId") VALUES ($1, $2)`, [postId, tagId]);
+        //verifica se a hashtag já existe
+        const checkHashtagExists = await checkHashtag(h);
+        //se já existe, insere na tabela posts_hashtags com o id da hashtag existente
+        //se não existe, posta a nova hashtag na tabela hashtags e depois insere na tabela posts_hashtags com o id da nova hashtag
+        if (checkHashtagExists.rows.length > 0) {
+          await insertPostHashtag(
+            returnPostId.rows[0].id,
+            checkHashtagExists.rows[0].id
+          );
+        } else {
+          const { rows } = await postHashtag(h);
+          await insertPostHashtag(returnPostId.rows[0].id, rows[0].id);
+        }
       });
     }
     res.status(201).send("Post criado com sucesso!");
@@ -72,21 +59,7 @@ export async function publicateLink(req, res) {
 export async function findAllLinks(req, res) {
   try {
     const { rows } = await getAllPublications();
-    const finalArr = rows.map((e) => {
-      return {
-        userName: e.userName,
-        userImage: e.pictureUrl,
-        likesCount: e.likes,
-        postDescription: e.description,
-        linkInfo: {
-          linkTitle: e.linkTitle,
-          linkDescription: e.linkDescription,
-          linkUrl: e.linkUrl,
-          linkImage: e.linkImage,
-        },
-      };
-    });
-    res.send(finalArr);
+    res.send(rows);
   } catch (err) {
     res.status(500).send(err.message);
     console.log(err.message);
@@ -97,21 +70,7 @@ export async function findAllLinksById(req, res) {
   const { userId } = res.locals.user;
   try {
     const { rows } = await getAllPublicationsById(userId);
-    const finalArr = rows.map((e) => {
-      return {
-        userName: e.userName,
-        userImage: e.pictureUrl,
-        likesCount: e.likes,
-        postDescription: e.description,
-        linkInfo: {
-          linkTitle: e.linkTitle,
-          linkDescription: e.linkDescription,
-          linkUrl: e.linkUrl,
-          linkImage: e.linkImage,
-        },
-      };
-    });
-    res.send(finalArr);
+    res.send(rows);
   } catch (err) {
     res.status(500).send(err.message);
     console.log(err.message);

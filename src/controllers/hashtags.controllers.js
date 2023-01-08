@@ -1,6 +1,4 @@
 import connection from "../database/db.js";
-import jwt from "jsonwebtoken";
-import urlMetadata from "url-metadata";
 
 export async function hashtags(req, res) {
     // const token = req.headers.authorization?.replace("Bearer ", "");

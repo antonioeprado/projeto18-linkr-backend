@@ -11,21 +11,41 @@ export const User = {
 		return connection.query(
 			`
 			SELECT
-				u.username,
-				ARRAY_TO_JSON(
-					ARRAY_AGG(
-						JSON_BUILD_OBJECT(
-							'id', p.id,
-							'url', p.url,
-							'description', p.description
-						)
-					)
-				) AS posts
-			FROM users u
-			JOIN posts p
-				ON u.id = p."userId"
-			WHERE u.id=$1
-			GROUP BY u.id
+        u.username,
+        u."pictureUrl" AS "userImage",
+        ARRAY_TO_JSON(
+          ARRAY_AGG(
+            JSON_BUILD_OBJECT(
+              'id', p.id,
+              'url', p.url,
+              'description', p.description,
+              'linkTitle', mt."linkTitle",
+              'linkDescription', mt."linkDescription",
+              'linkUrl', mt."linkUrl",
+              'linkImg', mt."linkImg",
+              'likesCount', COALESCE(likes."likesCount", 0)
+            )
+          )
+        ) AS posts
+      FROM users u
+      JOIN posts p
+        ON p."userId" = u.id
+      JOIN metadata mt
+        ON mt.id = p."metaId"
+      LEFT JOIN (
+        SELECT
+          posts.id AS "postNum",
+          COUNT(likes.id) AS "likesCount"
+        FROM likes
+        JOIN users
+          ON users.id = likes."userId"
+        JOIN posts
+          ON posts.id = likes."postId"
+        GROUP BY posts.id
+      ) likes
+        ON likes."postNum" = p.id
+      WHERE u.id = $1
+      GROUP BY u.id;
 			`,
 			[id]
 		);
@@ -37,3 +57,51 @@ export const User = {
 		);
 	},
 };
+
+export async function getUserByEmail(email) {
+	const existingEmail = await connection.query(
+		`SELECT * FROM users WHERE email = $1`,
+		[email]
+	);
+	console.log("email:", existingEmail.rows[0]);
+	return existingEmail;
+}
+
+export async function getUserByUsername(username) {
+	return await connection.query(`SELECT * FROM users WHERE username = $1`, [
+		username,
+	]);
+}
+
+export async function insertNewUser(
+	email,
+	passwordHashed,
+	username,
+	pictureUrl
+) {
+	return await connection.query(
+		`INSERT INTO users (email, password, username, "pictureUrl") VALUES ($1, $2, $3, $4)`,
+		[email, passwordHashed, username, pictureUrl]
+	);
+}
+
+export async function getAllUsersEmails() {
+	return await connection.query(`
+	  SELECT users.email FROM users
+	  `);
+}
+
+export async function createSessionByUserId(getUser) {
+	await connection.query(
+		`INSERT INTO sessions ("userId") VALUES ($1) RETURNING id`,
+		[getUser.rows[0].id]
+	);
+}
+
+export async function getSessionsByUserId(getUser) {
+	return await connection.query(
+		`
+	  SELECT * FROM sessions WHERE "userId" = $1`,
+		[getUser.rows[0].id]
+	);
+}
