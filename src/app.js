@@ -15,8 +15,9 @@ app.use(cors());
 
 app.use(router);
 app.use(authRouter);
-app.use(likesRouter)
+
 app.use(hashtagsRoutes);
+app.use(likesRouter)
 app.use(postRouter);
 
 const PORT = 4000 || process.env.PORT;

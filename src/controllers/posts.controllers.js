@@ -59,7 +59,6 @@ export async function publicateLink(req, res) {
 export async function findAllLinks(req, res) {
   try {
     const { rows } = await getAllPublications();
-    console.log(rows);
     const finalArr = rows.map((e) => {
       return {
         postId: e.postId,
