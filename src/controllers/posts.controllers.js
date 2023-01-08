@@ -59,23 +59,7 @@ export async function publicateLink(req, res) {
 export async function findAllLinks(req, res) {
   try {
     const { rows } = await getAllPublications();
-    console.log(rows);
-    const finalArr = rows.map((e) => {
-      return {
-        postId: e.postId,
-        userName: e.userName,
-        userImage: e.pictureUrl,
-        likesCount: e.likes,
-        postDescription: e.description,
-        linkInfo: {
-          linkTitle: e.linkTitle,
-          linkDescription: e.linkDescription,
-          linkUrl: e.linkUrl,
-          linkImage: e.linkImage,
-        },
-      };
-    });
-    res.send(finalArr);
+    res.send(rows);
   } catch (err) {
     res.status(500).send(err.message);
     console.log(err.message);
@@ -86,22 +70,7 @@ export async function findAllLinksById(req, res) {
   const { userId } = res.locals.user;
   try {
     const { rows } = await getAllPublicationsById(userId);
-    const finalArr = rows.map((e) => {
-      return {
-        postId: e.postId,
-        userName: e.userName,
-        userImage: e.pictureUrl,
-        likesCount: e.likes,
-        postDescription: e.description,
-        linkInfo: {
-          linkTitle: e.linkTitle,
-          linkDescription: e.linkDescription,
-          linkUrl: e.linkUrl,
-          linkImage: e.linkImage,
-        },
-      };
-    });
-    res.send(finalArr);
+    res.send(rows);
   } catch (err) {
     res.status(500).send(err.message);
     console.log(err.message);

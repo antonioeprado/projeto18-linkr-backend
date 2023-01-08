@@ -5,8 +5,17 @@ import checkPostExistence from "../middlewares/check.post.existence.middleware.j
 
 const likesRouter = Router();
 
-likesRouter.use(checkPostExistence)
-likesRouter.post("/like/:postId", ensureAuthentication, postLike);
-likesRouter.delete("/unlike/:postId", ensureAuthentication, deleteLike)
+likesRouter.post(
+  "/like/:postId",
+  ensureAuthentication,
+  checkPostExistence,
+  postLike
+);
+likesRouter.delete(
+  "/unlike/:postId",
+  ensureAuthentication,
+  checkPostExistence,
+  deleteLike
+);
 
 export default likesRouter;
