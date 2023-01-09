@@ -19,7 +19,7 @@ export function getAllPublicationsById(userId) {
   return connection.query(
     `
     SELECT 
-    users.id,
+    users.id AS "userId",
     users.username AS "userName",
     users."pictureUrl" AS "userImage", 
     COUNT(likes.id) AS "likesCount",
@@ -54,7 +54,7 @@ export function getAllPublicationsById(userId) {
 export function getAllPublications() {
   return connection.query(
     `SELECT 
-    users.id,
+    users.id AS "userId",
     users.username AS "userName",
     users."pictureUrl" AS "userImage", 
     COUNT(likes.id) AS "likesCount",

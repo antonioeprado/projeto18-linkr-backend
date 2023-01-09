@@ -7,6 +7,7 @@ import {
   insertPostHashtag,
   checkHashtag,
 } from "../repositories/post.repositories.js";
+import connection from "../database/db.js";
 
 //publica um post
 export async function publicateLink(req, res) {
@@ -74,5 +75,32 @@ export async function findAllLinksById(req, res) {
   } catch (err) {
     res.status(500).send(err.message);
     console.log(err.message);
+  }
+}
+
+export async function editPost(req, res) {
+  const { postId } = req.params;
+  const { description } = req.body;
+
+  try {
+    await connection.query(
+      `UPDATE posts SET description = $2 WHERE posts.id = $1`,
+      [postId, description]
+    );
+    res.status(200).send("Post editado com sucesso.")
+  } catch (error) {
+    console.log(`Error trying to update post with postId: ${postId}`);
+    console.log(`Server returned: ${error}`);
+    res.sendStatus(500);
+  }
+}
+
+export async function deletePost(req, res) {
+  const { postId } = req.params;
+  console.log(postId);
+  try {
+    await connection.query(`DELETE FROM posts WHERE posts.id = $1`, [postId]);
+  } catch (err) {
+    console.log(err);
   }
 }
