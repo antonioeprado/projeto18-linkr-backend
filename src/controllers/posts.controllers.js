@@ -81,6 +81,8 @@ export async function findAllLinksById(req, res) {
 export async function editPost(req, res) {
   const { postId } = req.params;
   const { description } = req.body;
+  const { userId } = res.locals.user;
+  
   try {
     await connection.query(
       `UPDATE posts SET description = $2 WHERE posts.id = $1`,
