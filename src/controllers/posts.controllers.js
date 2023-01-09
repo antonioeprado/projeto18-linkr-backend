@@ -97,9 +97,9 @@ export async function editPost(req, res) {
 
 export async function deletePost(req, res) {
   const { postId } = req.params;
-  console.log(postId);
   try {
     await connection.query(`DELETE FROM posts WHERE posts.id = $1`, [postId]);
+    res.send(200);
   } catch (err) {
     console.log(err);
   }
