@@ -81,8 +81,7 @@ export async function findAllLinksById(req, res) {
 export async function editPost(req, res) {
   const { postId } = req.params;
   const { description } = req.body;
-  const { userId } = res.locals.user;
-  
+
   try {
     await connection.query(
       `UPDATE posts SET description = $2 WHERE posts.id = $1`,
@@ -93,5 +92,16 @@ export async function editPost(req, res) {
     console.log(`Error trying to update post with postId: ${postId}`);
     console.log(`Server returned: ${error}`);
     res.sendStatus(500);
+  }
+}
+
+export async function deletePost(req, res) {
+  const { postId } = req.params;
+  const { userId } = res.locals.user;
+
+  try {
+    await connection.query(`DELETE posts WHERE posts.id = $1 AND posts."userId" = $2`, [postId, userId]);
+  } catch (err) {
+    console.log(err);
   }
 }
