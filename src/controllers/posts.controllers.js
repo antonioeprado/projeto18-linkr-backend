@@ -8,7 +8,6 @@ import {
   insertPostHashtag,
   checkHashtag,
 } from "../repositories/post.repositories.js";
-import connection from "../database/db.js";
 
 //publica um post
 export async function publicateLink(req, res) {
