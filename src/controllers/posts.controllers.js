@@ -7,6 +7,7 @@ import {
   insertPostHashtag,
   checkHashtag,
 } from "../repositories/post.repositories.js";
+import connection from "../database/db.js";
 
 //publica um post
 export async function publicateLink(req, res) {
@@ -85,6 +86,7 @@ export async function editPost(req, res) {
       `UPDATE posts SET description = $2 WHERE posts.id = $1`,
       [postId, description]
     );
+    res.status(200).send("Post editado com sucesso.")
   } catch (error) {
     console.log(`Error trying to update post with postId: ${postId}`);
     console.log(`Server returned: ${error}`);

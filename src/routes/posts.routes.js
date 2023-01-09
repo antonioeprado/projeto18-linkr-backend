@@ -25,7 +25,7 @@ postsRouter.post(
 );
 
 postsRouter.patch(
-  "/posts/:id",
+  "/posts/:postId",
   ensureAuthentication,
   checkPostExistence,
   editPost
