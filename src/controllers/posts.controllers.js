@@ -76,3 +76,18 @@ export async function findAllLinksById(req, res) {
     console.log(err.message);
   }
 }
+
+export async function editPost(req, res) {
+  const { postId } = req.params;
+  const { description } = req.body;
+  try {
+    await connection.query(
+      `UPDATE posts SET description = $2 WHERE posts.id = $1`,
+      [postId, description]
+    );
+  } catch (error) {
+    console.log(`Error trying to update post with postId: ${postId}`);
+    console.log(`Server returned: ${error}`);
+    res.sendStatus(500);
+  }
+}
