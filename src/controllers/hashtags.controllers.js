@@ -24,28 +24,39 @@ export async function hashtags(req, res) {
         const hashtagClick = await connection.query(
             `SELECT 
             h.tag,
-            p.url,
-            p.description,
-            u.username,
-            u."pictureUrl",
-            mt."linkUrl",
-            mt."linkTitle",
-            mt."linkDescription",
-            mt."linkImg",
-            COUNT(l.id) AS likes
-        FROM hashtags h
-        JOIN posts_hashtags ph
-            ON h.id = ph."tagId"
-        JOIN posts p
-            ON p.id = ph."postId"
-        JOIN users u
-            ON u.id = p."userId"
-        LEFT JOIN likes l
-            ON l."postId" = p.id
-        JOIN metadata mt
-            ON mt.id = p."metaId"
-        WHERE h.tag = $1
-        GROUP BY u.id, p.id, h.id, mt.id;
+            u.id AS "userId",
+                    p.url,
+                    p.description,
+                    u.username,
+                    u."pictureUrl",
+                    mt."linkUrl",
+                    mt."linkTitle",
+                    mt."linkDescription",
+                    mt."linkImg",
+                    COUNT(l.id) AS likes,
+                    ARRAY_TO_JSON(
+              ARRAY_AGG(
+                JSON_BUILD_OBJECT(
+                'userId', users1.id,
+                'username', users1.username
+              )
+              )
+            ) AS "likedBy"
+                FROM hashtags h
+                JOIN posts_hashtags ph
+                    ON h.id = ph."tagId"
+                JOIN posts p
+                    ON p.id = ph."postId"
+                JOIN users u
+                    ON u.id = p."userId"
+                LEFT JOIN likes l
+                    ON l."postId" = p.id
+                JOIN metadata mt
+                    ON mt.id = p."metaId"
+                LEFT JOIN users users1
+                    ON users1.id = l."userId"
+                WHERE h.tag = $1
+                GROUP BY u.id, p.id, h.id, mt.id;
            `,
             [hashtags]
         );
