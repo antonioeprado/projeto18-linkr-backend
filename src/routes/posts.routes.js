@@ -32,6 +32,6 @@ postsRouter.patch(
   editPost
 );
 
-postsRouter.delete("/posts/:postId", ensureAuthentication, checkPostExistence, deletePost);
+postsRouter.delete("/posts/:postId", checkPostExistence, deletePost);
 
 export default postsRouter;

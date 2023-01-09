@@ -97,10 +97,9 @@ export async function editPost(req, res) {
 
 export async function deletePost(req, res) {
   const { postId } = req.params;
-  const { userId } = res.locals.user;
-
+  console.log(postId);
   try {
-    await connection.query(`DELETE posts WHERE posts.id = $1 AND posts."userId" = $2`, [postId, userId]);
+    await connection.query(`DELETE FROM posts WHERE posts.id = $1`, [postId]);
   } catch (err) {
     console.log(err);
   }
