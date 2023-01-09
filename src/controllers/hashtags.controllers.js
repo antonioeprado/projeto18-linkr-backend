@@ -4,7 +4,6 @@ export async function hashtags(req, res) {
     // const token = req.headers.authorization?.replace("Bearer ", "");
     // const secretKey = process.env.JWT_SECRET;
     const { hashtags } = req.params;
-    console.log(hashtags)
     // if (!token) {
     //     return res.sendStatus(401);
     // }
@@ -25,28 +24,39 @@ export async function hashtags(req, res) {
         const hashtagClick = await connection.query(
             `SELECT 
             h.tag,
-            p.url,
-            p.description,
-            u.username,
-            u."pictureUrl",
-            mt."linkUrl",
-            mt."linkTitle",
-            mt."linkDescription",
-            mt."linkImg",
-            COUNT(l.id) AS likes
-        FROM hashtags h
-        JOIN posts_hashtags ph
-            ON h.id = ph."tagId"
-        JOIN posts p
-            ON p.id = ph."postId"
-        JOIN users u
-            ON u.id = p."userId"
-        LEFT JOIN likes l
-            ON l."postId" = p.id
-        JOIN metadata mt
-            ON mt.id = p."metaId"
-        WHERE h.tag = $1
-        GROUP BY u.id, p.id, h.id, mt.id;
+            u.id AS "userId",
+                    p.url,
+                    p.description,
+                    u.username,
+                    u."pictureUrl",
+                    mt."linkUrl",
+                    mt."linkTitle",
+                    mt."linkDescription",
+                    mt."linkImg",
+                    COUNT(l.id) AS likes,
+                    ARRAY_TO_JSON(
+              ARRAY_AGG(
+                JSON_BUILD_OBJECT(
+                'userId', users1.id,
+                'username', users1.username
+              )
+              )
+            ) AS "likedBy"
+                FROM hashtags h
+                JOIN posts_hashtags ph
+                    ON h.id = ph."tagId"
+                JOIN posts p
+                    ON p.id = ph."postId"
+                JOIN users u
+                    ON u.id = p."userId"
+                LEFT JOIN likes l
+                    ON l."postId" = p.id
+                JOIN metadata mt
+                    ON mt.id = p."metaId"
+                LEFT JOIN users users1
+                    ON users1.id = l."userId"
+                WHERE h.tag = $1
+                GROUP BY u.id, p.id, h.id, mt.id;
            `,
             [hashtags]
         );
@@ -63,7 +73,7 @@ export async function trendings(req, res) {
         FROM posts_hashtags ph
         JOIN hashtags h
         ON h.id = ph."tagId"
-        GROUP BY h.tag ORDER BY tag_count DESC LIMIT 10`);
+        GROUP BY h.tag ORDER BY tag_count DESC LIMIT 9`);
         for(let i = 0; i < trends.rows.length; i++){
             delete trends.rows[i].tag_count;
         }
