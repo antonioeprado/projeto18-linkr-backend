@@ -8,7 +8,6 @@ import {
   checkHashtag,
 } from "../repositories/post.repositories.js";
 import connection from "../database/db.js";
-import connection from "../database/db.js";
 
 //publica um post
 export async function publicateLink(req, res) {
@@ -98,6 +97,12 @@ export async function editPost(req, res) {
 
 export async function deletePost(req, res) {
   const { postId } = req.params;
+  const { userId } = res.locals.user;
+
+  if (!userId) {
+    res.sendStatus(401);
+  }
+  
   try {
     await connection.query(`DELETE FROM posts WHERE posts.id = $1`, [postId]);
     res.send(200);

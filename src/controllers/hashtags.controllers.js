@@ -2,24 +2,13 @@ import connection from "../database/db.js";
 
 export async function hashtags(req, res) {
     const { hashtags } = req.params;
-    // const { userId } = res.locals.user;
-    // console.log(userId);
+    const { userId } = res.locals.user;
+
+    if (!userId) {
+        res.sendStatus(401);
+    }
+    
     try {
-        // const sessionExist = jwt.verify(token, secretKey);
-        // if (!sessionExist) {
-        //     return res.sendStatus(404);
-        // }
-
-        // const userLogado = await connection.query(`SELECT * FROM users WHERE id = $1`,
-        //     [sessionExist.userId]);
-
-        // if (!userLogado) {
-        //     return res.sendStatus(404);
-        // }
-
-        // if(!userId){
-        //     return res.sendStatus(401);
-        // }
 
         const hashtagClick = await connection.query(
             `SELECT 
@@ -74,7 +63,7 @@ export async function trendings(req, res) {
         JOIN hashtags h
         ON h.id = ph."tagId"
         GROUP BY h.tag ORDER BY tag_count DESC LIMIT 9`);
-        for(let i = 0; i < trends.rows.length; i++){
+        for (let i = 0; i < trends.rows.length; i++) {
             delete trends.rows[i].tag_count;
         }
         res.send(trends.rows);
