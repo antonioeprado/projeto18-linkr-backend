@@ -1,13 +1,9 @@
 import connection from "../database/db.js";
 
 export async function hashtags(req, res) {
-    // const token = req.headers.authorization?.replace("Bearer ", "");
-    // const secretKey = process.env.JWT_SECRET;
     const { hashtags } = req.params;
-    // if (!token) {
-    //     return res.sendStatus(401);
-    // }
-
+    // const { userId } = res.locals.user;
+    // console.log(userId);
     try {
         // const sessionExist = jwt.verify(token, secretKey);
         // if (!sessionExist) {
@@ -19,6 +15,10 @@ export async function hashtags(req, res) {
 
         // if (!userLogado) {
         //     return res.sendStatus(404);
+        // }
+
+        // if(!userId){
+        //     return res.sendStatus(401);
         // }
 
         const hashtagClick = await connection.query(
@@ -62,7 +62,7 @@ export async function trendings(req, res) {
         FROM posts_hashtags ph
         JOIN hashtags h
         ON h.id = ph."tagId"
-        GROUP BY h.tag ORDER BY tag_count DESC LIMIT 10`);
+        GROUP BY h.tag ORDER BY tag_count DESC LIMIT 9`);
         for(let i = 0; i < trends.rows.length; i++){
             delete trends.rows[i].tag_count;
         }
