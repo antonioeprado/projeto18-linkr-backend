@@ -4,7 +4,6 @@ import {
   findAllLinksById,
   findAllLinks,
   editPost,
-  deletePost
 } from "../controllers/posts.controllers.js";
 import postModelValidation from "../middlewares/post.model.validation.middleware.js";
 import { ensureAuthentication } from "../middlewares/auth.validation.middleware.js";
@@ -26,12 +25,10 @@ postsRouter.post(
 );
 
 postsRouter.patch(
-  "/posts/:postId",
+  "/posts/:id",
   ensureAuthentication,
   checkPostExistence,
   editPost
 );
-
-postsRouter.delete("/posts/:postId", checkPostExistence, deletePost);
 
 export default postsRouter;
