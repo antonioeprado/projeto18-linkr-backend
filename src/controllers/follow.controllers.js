@@ -15,3 +15,19 @@ export async function followUser(req, res) {
     res.sendStatus(500);
   }
 }
+
+export async function unFollowUser(req, res) {
+  const { id } = req.params;
+  const { userId } = res.locals.user;
+  try {
+    await connection.query(
+      `DELETE FROM following_flow WHERE "userId"=$1 AND follower=$2`,
+      [userId, id]
+    );
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(`Error trying to unfollow user ${id}`);
+    console.log(`Server returned: ${error}`);
+    res.sendStatus(500);
+  }
+}
