@@ -2,7 +2,6 @@ import connection from "../database/db.js";
 
 export default async function checkPostExistence(req, res, next) {
   const { postId } = req.params;
-  console.log(postId);
   const { rows } = await connection.query(`SELECT * FROM posts WHERE id=$1`, [
     postId,
   ]);

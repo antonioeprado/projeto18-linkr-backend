@@ -4,7 +4,7 @@ import {
   findAllLinksById,
   findAllLinks,
   editPost,
-  deletePost
+  deletePost,
 } from "../controllers/posts.controllers.js";
 import postModelValidation from "../middlewares/post.model.validation.middleware.js";
 import { ensureAuthentication } from "../middlewares/auth.validation.middleware.js";
