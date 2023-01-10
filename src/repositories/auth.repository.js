@@ -13,6 +13,7 @@ export const User = {
 		SELECT
 			u.username,
 			u."pictureUrl" AS "userImage",
+			followers."followedBy",
 			ARRAY_TO_JSON(
 			ARRAY_AGG(
 				JSON_BUILD_OBJECT(
@@ -64,8 +65,18 @@ export const User = {
 			GROUP BY posts.id
 		) likes2
 			ON likes2.id = p.id
+		LEFT JOIN (
+			SELECT
+				u1.id AS id,
+				ARRAY_AGG(ff.follower) AS "followedBy"
+			FROM users u1
+			JOIN following_flow ff
+				ON ff."userId" = u1.id
+			GROUP BY u1.id
+		) followers
+			ON followers.id = u.id
 		WHERE u.id = $1
-		GROUP BY u.id;
+		GROUP BY u.id, followers."followedBy"
 		`,
       [id]
     );
