@@ -1,13 +1,10 @@
-import connection from "../database/db.js";
+import { User } from "../repositories/auth.repository.js";
 
-export async function followUser(req, res) {
+export async function followUserController(req, res) {
   const { id } = req.params;
   const { userId } = res.locals.user;
   try {
-    await connection.query(
-      `INSERT INTO following_flow ("userId", follower) VALUES ($1, $2)`,
-      [userId, id]
-    );
+    await User.followUser(userId, id);
     res.sendStatus(201);
   } catch (error) {
     console.log(`Error trying to follow user ${id}`);
@@ -16,14 +13,11 @@ export async function followUser(req, res) {
   }
 }
 
-export async function unFollowUser(req, res) {
+export async function unFollowUserController(req, res) {
   const { id } = req.params;
   const { userId } = res.locals.user;
   try {
-    await connection.query(
-      `DELETE FROM following_flow WHERE "userId"=$1 AND follower=$2`,
-      [userId, id]
-    );
+    await User.unfollowUser(userId, id);
     res.sendStatus(200);
   } catch (error) {
     console.log(`Error trying to unfollow user ${id}`);
