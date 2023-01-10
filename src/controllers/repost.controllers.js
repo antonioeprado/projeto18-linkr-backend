@@ -9,7 +9,7 @@ export function createRepost(req, res) {
       `INSERT INTO reposts ("postId", "userId") VALUES ($1,$2);`,
       [postId, userId]
     );
-    res.status(201).send("Publicação repostada com sucesso.")
+    res.status(201).send("Publicação repostada com sucesso.");
   } catch (err) {
     res
       .status(500)
