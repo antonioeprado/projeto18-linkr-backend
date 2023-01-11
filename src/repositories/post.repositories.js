@@ -17,13 +17,12 @@ export function postPublication(userId, metaId, url, description) {
 
 export function getAllPublicationsById(userId) {
   return connection.query(
-    `
-    SELECT 
+    `SELECT 
     users.id AS "userId",
     users.username AS "userName",
     users."pictureUrl" AS "userImage", 
     COUNT(likes.id) AS "likesCount",
-	COUNT(reposts."userId") AS "repostsCount",
+	  COUNT(reposts."userId") AS "repostsCount",
     posts.id AS "postId",
     posts.description AS "postDescription", 
     posts.url, 
@@ -38,13 +37,22 @@ export function getAllPublicationsById(userId) {
         'username', users1.username
       )
       )
-    ) AS "likedBy"
+    ) AS "likedBy",
+    ARRAY_TO_JSON(
+      ARRAY_AGG(
+        JSON_BUILD_OBJECT(
+          'commentAuthorId', comments."authorId",
+          'comment', comments.comment
+        )
+      )
+    ) AS comments
   FROM posts 
   JOIN users ON posts."userId"=users.id 
   JOIN metadata ON posts."metaId"=metadata.id 
   LEFT JOIN likes ON likes."postId"=posts.id
   LEFT JOIN users users1 ON users1.id = likes."userId"
   LEFT JOIN reposts ON reposts."postId"=posts.id
+  LEFT JOIN comments ON comments."postId"=posts.id
   WHERE users.id=$1
   GROUP BY users.id, posts.id, metadata.id
   ORDER BY posts.id DESC
@@ -60,7 +68,7 @@ export function getAllPublications() {
     users.username AS "userName",
     users."pictureUrl" AS "userImage", 
     COUNT(likes.id) AS "likesCount",
-	COUNT(reposts."userId") AS "repostsCount",
+	  COUNT(reposts."userId") AS "repostsCount",
     posts.id AS "postId",
     posts.description AS "postDescription", 
     posts.url, 
@@ -75,13 +83,22 @@ export function getAllPublications() {
         'username', users1.username
       )
       )
-    ) AS "likedBy"
+    ) AS "likedBy",
+    ARRAY_TO_JSON(
+      ARRAY_AGG(
+        JSON_BUILD_OBJECT(
+          'commentAuthorId', comments."authorId",
+          'comment', comments.comment
+        )
+      )
+    ) AS comments
   FROM posts 
   JOIN users ON posts."userId"=users.id 
   JOIN metadata ON posts."metaId"=metadata.id 
   LEFT JOIN likes ON likes."postId"=posts.id
   LEFT JOIN users users1 ON users1.id = likes."userId"
   LEFT JOIN reposts ON reposts."postId"=posts.id
+  LEFT JOIN comments ON comments."postId"=posts.id
   GROUP BY users.id, posts.id, metadata.id
   ORDER BY posts.id DESC
   LIMIT 20;`
