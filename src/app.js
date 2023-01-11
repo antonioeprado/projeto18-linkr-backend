@@ -7,6 +7,7 @@ import postRouter from "./routes/posts.routes.js";
 import likesRouter from "./routes/likes.routes.js";
 import followRouter from "./routes/follow.routes.js";
 import repostRouter from "./routes/repost.routes.js";
+import commentsRouter from "./routes/comments.routes.js";
 
 import cors from "cors";
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(hashtagsRoutes);
 app.use(likesRouter);
 app.use(postRouter);
 app.use(repostRouter);
+app.use(commentsRouter);
 
 const PORT = 4000 || process.env.PORT;
 app.listen(PORT, () => {
