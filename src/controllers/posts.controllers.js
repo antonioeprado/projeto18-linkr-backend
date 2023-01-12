@@ -86,9 +86,29 @@ export async function editPost(req, res) {
       `UPDATE posts SET description = $2 WHERE posts.id = $1`,
       [postId, description]
     );
+    res.status(200).send("Post editado com sucesso.");
   } catch (error) {
     console.log(`Error trying to update post with postId: ${postId}`);
     console.log(`Server returned: ${error}`);
     res.sendStatus(500);
+  }
+}
+
+export async function deletePost(req, res) {
+  const { postId } = req.params;
+  const { userId } = res.locals.user;
+
+  if (!userId) {
+    res.sendStatus(401);
+  }
+
+  try {
+    await connection.query(
+      `DELETE FROM posts WHERE posts.id = $1 AND posts."userId"=$2`,
+      [postId, userId]
+    );
+    res.send(200);
+  } catch (err) {
+    console.log(err);
   }
 }
