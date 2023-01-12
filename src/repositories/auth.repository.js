@@ -83,7 +83,18 @@ export const User = {
   },
   findByName: function (name) {
     return connection.query(
-      `SELECT u.id, u.username, u."pictureUrl" FROM users u WHERE username LIKE $1 || '%'`,
+      `
+	  SELECT
+	  	u.id,
+		u.username,
+		u."pictureUrl",
+		ARRAY_AGG(ff.follower) AS "followedBy"
+	  FROM users u
+	  LEFT JOIN following_flow ff
+		ON ff."userId" = u.id
+	  WHERE username LIKE $1 || '%'
+	  GROUP BY u.id
+	  `,
       [name]
     );
   },
