@@ -23,7 +23,7 @@ export const User = {
 				'linkTitle', mt."linkTitle",
 				'linkDescription', mt."linkDescription",
 				'linkUrl', mt."linkUrl",
-				'linkImg', mt."linkImg",
+				'linkImage', mt."linkImg",
 				'likesCount', COALESCE(likes1."likesCount", 0),
 				'likedBy', likes2."likedBy"
 				)
