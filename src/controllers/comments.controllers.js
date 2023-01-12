@@ -1,4 +1,7 @@
-import { insertComment } from "../repositories/comments.repository.js";
+import {
+  getCommentsByPostId,
+  insertComment,
+} from "../repositories/comments.repository.js";
 import { findPostById } from "../repositories/post.repositories.js";
 
 export async function createComment(req, res) {
@@ -19,6 +22,26 @@ export async function createComment(req, res) {
     }
 
     console.log(newComment);
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+}
+
+export async function getComment(req, res) {
+  const { postId } = req.params;
+  const { userId } = res.locals.user;
+
+  try {
+    const getComments = await getCommentsByPostId(postId);
+
+    if (getComments.rowCount === 0) {
+      return res.sendStatus(404);
+    }
+
+    console.log(getComments.rows);
 
     res.sendStatus(200);
   } catch (err) {
