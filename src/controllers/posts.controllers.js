@@ -1,3 +1,4 @@
+import connection from "../database/db.js";
 import filterHashtags from "../repositories/filter.hashtags.repository.js";
 import {
   postHashtag,
@@ -7,7 +8,6 @@ import {
   insertPostHashtag,
   checkHashtag,
 } from "../repositories/post.repositories.js";
-import connection from "../database/db.js";
 
 //publica um post
 export async function publicateLink(req, res) {
@@ -81,7 +81,6 @@ export async function findAllLinksById(req, res) {
 export async function editPost(req, res) {
   const { postId } = req.params;
   const { description } = req.body;
-
   try {
     await connection.query(
       `UPDATE posts SET description = $2 WHERE posts.id = $1`,
@@ -102,7 +101,7 @@ export async function deletePost(req, res) {
   if (!userId) {
     res.sendStatus(401);
   }
-  
+
   try {
     await connection.query(
       `DELETE FROM posts WHERE posts.id = $1 AND posts."userId"=$2`,

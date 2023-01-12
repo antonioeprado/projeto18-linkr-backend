@@ -26,12 +26,17 @@ postsRouter.post(
 );
 
 postsRouter.patch(
-  "/posts/:postId",
+  "/posts/:id",
   ensureAuthentication,
   checkPostExistence,
   editPost
 );
 
-postsRouter.delete("/posts/:postId", ensureAuthentication, checkPostExistence, deletePost);
+postsRouter.delete(
+  "/posts/:postId",
+  ensureAuthentication,
+  checkPostExistence,
+  deletePost
+);
 
 export default postsRouter;

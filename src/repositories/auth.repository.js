@@ -23,7 +23,7 @@ export const User = {
 				'linkTitle', mt."linkTitle",
 				'linkDescription', mt."linkDescription",
 				'linkUrl', mt."linkUrl",
-				'linkImg', mt."linkImg",
+				'linkImage', mt."linkImg",
 				'likesCount', COALESCE(likes1."likesCount", 0),
 				'likedBy', likes2."likedBy"
 				)
@@ -83,20 +83,31 @@ export const User = {
   },
   findByName: function (name) {
     return connection.query(
-      `SELECT u.id, u.username, u."pictureUrl" FROM users u WHERE username LIKE $1 || '%'`,
+      `
+	  SELECT
+	  	u.id,
+		u.username,
+		u."pictureUrl",
+		ARRAY_AGG(ff.follower) AS "followedBy"
+	  FROM users u
+	  LEFT JOIN following_flow ff
+		ON ff."userId" = u.id
+	  WHERE username LIKE $1 || '%'
+	  GROUP BY u.id
+	  `,
       [name]
     );
   },
   followUser: function (userId, id) {
     return connection.query(
       `INSERT INTO following_flow ("userId", follower) VALUES ($1, $2)`,
-      [userId, id]
+      [id, userId]
     );
   },
   unfollowUser: function (userId, id) {
     return connection.query(
       `DELETE FROM following_flow WHERE "userId"=$1 AND follower=$2`,
-      [userId, id]
+      [id, userId]
     );
   },
 };
