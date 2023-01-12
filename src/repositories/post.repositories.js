@@ -46,7 +46,14 @@ export function getAllPublicationsById(userId) {
           'comment', comments.comment
         )
       )
-    ) AS comments
+    ) AS comments,
+    ARRAY_TO_JSON(
+      ARRAY_AGG(
+        JSON_BUILD_OBJECT(
+          'userId', reposts."userId"
+        )
+      )
+    ) AS "repostedBy"
   FROM posts 
   JOIN users ON posts."userId"=users.id 
   JOIN metadata ON posts."metaId"=metadata.id 
@@ -93,7 +100,14 @@ export function getAllPublications() {
           'comment', comments.comment
         )
       )
-    ) AS comments
+    ) AS comments,
+    ARRAY_TO_JSON(
+      ARRAY_AGG(
+        JSON_BUILD_OBJECT(
+          'userId', reposts."userId"
+        )
+      )
+    ) AS "repostedBy"
   FROM posts 
   JOIN users ON posts."userId"=users.id 
   JOIN metadata ON posts."metaId"=metadata.id 
