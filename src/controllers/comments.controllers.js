@@ -41,9 +41,7 @@ export async function getComment(req, res) {
       return res.sendStatus(404);
     }
 
-    console.log(getComments.rows);
-
-    res.sendStatus(200);
+    res.send(getComments.rows).status(200);
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
