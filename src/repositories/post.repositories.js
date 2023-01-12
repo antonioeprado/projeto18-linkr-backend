@@ -128,3 +128,12 @@ export function insertPostHashtag(postId, tagId) {
 export function checkHashtag(hashtag) {
   return connection.query(`SELECT * FROM hashtags WHERE tag=$1`, [hashtag]);
 }
+
+export async function findPostById(postId) {
+  return await connection.query(
+    `
+          SELECT * FROM posts WHERE id = $1
+          `,
+    [postId]
+  );
+}
