@@ -11,6 +11,11 @@ export async function metadataMiddleware(req, res, next) {
     if (metadataFromUrl.rows.length < 1) {
       await urlMetadata(url)
         .then(async (a) => {
+          //se o titulo, a descriçao, a url ou a imagem vierem como null da API de metadados, salvar algo que nao seja nulo na tabela
+          a.title === null ? a.title = "Not Found" : ""
+          a.description === null ? a.description = "Not Found" : ""
+          a.url === null ? a.url = "Not Found" : ""
+          a.image === null ? a.image = "Not Found" : ""
           const { rows } = await insertNewMetadata(
             a.title,
             a.description,
