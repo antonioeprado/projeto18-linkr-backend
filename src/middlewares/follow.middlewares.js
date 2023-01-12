@@ -7,7 +7,7 @@ export async function isFollowing(req, res, next) {
   try {
     const isFollowed = await connection.query(
       `SELECT * FROM following_flow WHERE "userId" = $1 AND follower = $2`,
-      [userId, id]
+      [id, userId]
     );
     if (verb === "POST" && isFollowed.rowCount)
       return res.status(409).send("You're already following this user.");

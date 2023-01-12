@@ -90,13 +90,13 @@ export const User = {
   followUser: function (userId, id) {
     return connection.query(
       `INSERT INTO following_flow ("userId", follower) VALUES ($1, $2)`,
-      [userId, id]
+      [id, userId]
     );
   },
   unfollowUser: function (userId, id) {
     return connection.query(
       `DELETE FROM following_flow WHERE "userId"=$1 AND follower=$2`,
-      [userId, id]
+      [id, userId]
     );
   },
 };
