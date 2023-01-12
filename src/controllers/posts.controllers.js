@@ -97,6 +97,7 @@ export async function editPost(req, res) {
 export async function deletePost(req, res) {
   const { postId } = req.params;
   const { userId } = res.locals.user;
+  console.log(postId, userId)
 
   if (!userId) {
     res.sendStatus(401);
@@ -104,10 +105,10 @@ export async function deletePost(req, res) {
 
   try {
     await connection.query(
-      `DELETE FROM posts WHERE posts.id = $1 AND posts."userId"=$2`,
+      `DELETE FROM posts WHERE posts.id=$1 AND posts."userId"=$2;`,
       [postId, userId]
     );
-    res.send(200);
+    res.status(200).send("Post excluído com sucesso.");
   } catch (err) {
     console.log(err);
   }
