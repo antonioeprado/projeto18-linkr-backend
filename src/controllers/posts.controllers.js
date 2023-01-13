@@ -64,7 +64,10 @@ export async function findAllLinks(req, res) {
   try {
     const userPosts = await User.findById(userId);
     const followerPosts = await getAllFollowersPublications(userId);
-    const result = userPosts.rows.concat(followerPosts.rows);
+    const result = {
+      user: userPosts.rows[0],
+      followers: followerPosts.rows,
+    };
     res.send(result);
   } catch (err) {
     res.status(500).send(err.message);
