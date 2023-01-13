@@ -11,6 +11,7 @@ export const User = {
     return connection.query(
       `
 		SELECT
+			u.id AS "posterId",
 			u.username,
 			u."pictureUrl" AS "userImage",
 			followers."followedBy",
