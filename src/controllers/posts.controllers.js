@@ -8,6 +8,8 @@ import {
   insertPostHashtag,
   checkHashtag,
   getAllFollowersPublications,
+  getAllRepostsById,
+  getAllRepostsFromWhoFollows,
 } from "../repositories/post.repositories.js";
 import { User } from "../repositories/auth.repository.js";
 
@@ -63,8 +65,14 @@ export async function findAllLinks(req, res) {
   const { userId } = res.locals.user;
   try {
     const userPosts = await User.findById(userId);
+    const userReposts = await getAllRepostsById(userId);
     const followerPosts = await getAllFollowersPublications(userId);
-    const result = userPosts.rows.concat(followerPosts.rows);
+    const followerReposts = await getAllRepostsFromWhoFollows(userId);
+    const result = userPosts.rows.concat(
+      userReposts.rows,
+      followerPosts.rows,
+      followerReposts.rows
+    );
     res.send(result);
   } catch (err) {
     res.status(500).send(err.message);
