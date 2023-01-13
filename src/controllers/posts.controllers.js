@@ -7,7 +7,9 @@ import {
   getAllPublications,
   insertPostHashtag,
   checkHashtag,
+  getAllFollowersPublications,
 } from "../repositories/post.repositories.js";
+import { User } from "../repositories/auth.repository.js";
 
 //publica um post
 export async function publicateLink(req, res) {
@@ -58,9 +60,12 @@ export async function publicateLink(req, res) {
 
 //pega todos os posts, do mais recente ao mais antigo, num limite de 20 posts
 export async function findAllLinks(req, res) {
+  const { userId } = res.locals.user;
   try {
-    const { rows } = await getAllPublications();
-    res.send(rows);
+    const userPosts = await User.findById(userId);
+    const followerPosts = await getAllFollowersPublications(userId);
+    const result = userPosts.rows.concat(followerPosts.rows);
+    res.send(result);
   } catch (err) {
     res.status(500).send(err.message);
     console.log(err.message);
@@ -97,7 +102,7 @@ export async function editPost(req, res) {
 export async function deletePost(req, res) {
   const { postId } = req.params;
   const { userId } = res.locals.user;
-  console.log(postId, userId)
+  console.log(postId, userId);
 
   if (!userId) {
     res.sendStatus(401);

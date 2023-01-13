@@ -121,6 +121,75 @@ export function getAllPublications() {
   );
 }
 
+export function getAllFollowersPublications(id) {
+  return connection.query(
+    `
+    SELECT
+    u1.id,
+    u1.username,
+    u1."pictureUrl",
+      ARRAY_TO_JSON(
+        ARRAY_AGG(
+          JSON_BUILD_OBJECT(
+          'postId', p.id,
+          'url', p.url,
+          'description', p.description,
+          'linkTitle', mt."linkTitle",
+          'linkDescription', mt."linkDescription",
+          'linkUrl', mt."linkUrl",
+          'linkImage', mt."linkImg",
+          'likesCount', COALESCE(likes1."likesCount", 0),
+          'likedBy', likes2."likedBy"
+          )
+        )
+      ) AS "followerPosts"
+    FROM users u
+    JOIN following_flow ff
+      ON ff.follower = u.id
+    JOIN posts p
+      ON p."userId" = ff."userId"
+    JOIN users u1
+      ON u1.id = p."userId"
+    JOIN metadata mt
+      ON mt.id = p."metaId"
+    LEFT JOIN (
+      SELECT
+      posts.id AS "postNum",
+      COUNT(likes.id) AS "likesCount"
+      FROM likes
+      JOIN users
+      ON users.id = likes."userId"
+      JOIN posts
+      ON posts.id = likes."postId"
+      GROUP BY posts.id
+    ) likes1
+      ON likes1."postNum" = p.id
+    LEFT JOIN (
+      SELECT
+        posts.id AS id,
+        ARRAY_TO_JSON(
+          ARRAY_AGG(
+            JSON_BUILD_OBJECT(
+              'id', users.id,
+              'username', users.username
+              )
+          )
+        ) AS "likedBy"
+      FROM likes
+      JOIN posts
+        ON posts.id = likes."postId"
+      JOIN users
+        ON users.id = likes."userId"
+      GROUP BY posts.id
+    ) likes2
+      ON likes2.id = p.id
+    WHERE u.id=$1
+    GROUP BY u1.id;
+    `,
+    [id]
+  );
+}
+
 export function checkMetadata(url) {
   return connection.query(`SELECT * FROM metadata WHERE "linkUrl"=$1`, [url]);
 }
