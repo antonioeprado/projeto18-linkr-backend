@@ -10,7 +10,8 @@ export async function insertComment(postId, authorId, comment) {
 }
 
 export async function getCommentsByPostId(postId) {
-  return await connection.query(`SELECT * FROM comments WHERE "postId" = $1`, [
-    postId,
-  ]);
+  return await connection.query(
+    `SELECT comments.*, users.username, users."pictureUrl" FROM comments JOIN users ON comments."authorId" = users.id WHERE "postId" = $1 `,
+    [postId]
+  );
 }
