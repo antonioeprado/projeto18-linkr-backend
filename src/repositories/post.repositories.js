@@ -125,7 +125,7 @@ export function getAllFollowersPublications(id) {
   return connection.query(
     `
     SELECT
-    u1.id,
+    u1.id AS "userId",
     u1.username,
     u1."pictureUrl",
       ARRAY_TO_JSON(
@@ -225,7 +225,7 @@ export async function findPostById(postId) {
 export async function getAllRepostsById(userId) {
   return connection.query(
     `SELECT 
-    users.id AS "posterId",
+    users.id AS "userId",
     users.username AS "userName",
     users."pictureUrl" AS "userImage", 
     COUNT(likes.id) AS "likesCount",
@@ -280,54 +280,54 @@ export async function getAllRepostsById(userId) {
 export async function getAllRepostsFromWhoFollows(userId) {
   return connection.query(
     `
-  SELECT 
-  users.id AS "userId",
-  users.username AS "userName",
-  users."pictureUrl" AS "userImage", 
-  COUNT(likes.id) AS "likesCount",
-  COUNT(comments.id) AS "commentsCount",
-  COUNT(reposts."userId") AS "repostsCount",
-  posts.id AS "postId",
-  posts.description AS "postDescription", 
-  posts.url, 
-  metadata."linkTitle",
-  metadata."linkDescription", 
-  metadata."linkUrl", 
-  metadata."linkImg" AS "linkImage",
-  ARRAY_TO_JSON(
-    ARRAY_AGG(
-      JSON_BUILD_OBJECT(
-      'userId', users1.id,
-      'username', users1.username
-    )
-    )
-  ) AS "likedBy",
-  ARRAY_TO_JSON(
-    ARRAY_AGG(
-      JSON_BUILD_OBJECT(
-        'commentAuthorId', comments."authorId",
-        'comment', comments.comment
+    SELECT 
+    users.id AS "userId",
+    users.username AS "userName",
+    users."pictureUrl" AS "userImage", 
+    COUNT(likes.id) AS "likesCount",
+    COUNT(comments.id) AS "commentsCount",
+	  COUNT(reposts."userId") AS "repostsCount",
+    posts.id AS "postId",
+    posts.description AS "postDescription", 
+    posts.url, 
+    metadata."linkTitle",
+    metadata."linkDescription", 
+    metadata."linkUrl", 
+    metadata."linkImg" AS "linkImage",
+    ARRAY_TO_JSON(
+      ARRAY_AGG(
+        JSON_BUILD_OBJECT(
+        'userId', users1.id,
+        'username', users1.username
       )
-    )
-  ) AS comments,
-  ARRAY_TO_JSON(
-    ARRAY_AGG(
-      JSON_BUILD_OBJECT(
-        'userId', reposts."userId"
       )
-    )
-  ) AS "repostedBy"
-FROM posts 
-JOIN users ON posts."userId"=users.id 
-JOIN metadata ON posts."metaId"=metadata.id 
-LEFT JOIN likes ON likes."postId"=posts.id
-LEFT JOIN users users1 ON users1.id = likes."userId"
-LEFT JOIN reposts ON reposts."postId"=posts.id
-LEFT JOIN comments ON comments."postId"=posts.id
-WHERE users.id IN (SELECT "userId" FROM following_flow WHERE follower=$1 )
-GROUP BY users.id, posts.id, metadata.id
-ORDER BY posts.id DESC
-LIMIT 20;`,
+    ) AS "likedBy",
+    ARRAY_TO_JSON(
+      ARRAY_AGG(
+        JSON_BUILD_OBJECT(
+          'commentAuthorId', comments."authorId",
+          'comment', comments.comment
+        )
+      )
+    ) AS comments,
+    ARRAY_TO_JSON(
+      ARRAY_AGG(
+        JSON_BUILD_OBJECT(
+          'userId', reposts."userId"
+        )
+      )
+    ) AS "repostedBy"
+  FROM posts 
+  JOIN users ON posts."userId"=users.id 
+  JOIN metadata ON posts."metaId"=metadata.id 
+  LEFT JOIN likes ON likes."postId"=posts.id
+  LEFT JOIN users users1 ON users1.id = likes."userId"
+  LEFT JOIN reposts ON reposts."postId"=posts.id
+  LEFT JOIN comments ON comments."postId"=posts.id
+  WHERE posts.id IN (SELECT reposts."postId" FROM reposts JOIN following_flow ff ON ff."userId"=reposts."userId" WHERE ff.follower=$1)
+  GROUP BY users.id, posts.id, metadata.id
+  ORDER BY posts.id DESC
+  LIMIT 20;`,
     [userId]
   );
 }

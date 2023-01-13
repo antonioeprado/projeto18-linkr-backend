@@ -64,15 +64,13 @@ export async function publicateLink(req, res) {
 export async function findAllLinks(req, res) {
   const { userId } = res.locals.user;
   try {
-    const userPosts = await User.findById(userId);
+    const userPosts = await getAllPublicationsById(userId);
     const userReposts = await getAllRepostsById(userId);
     const followerPosts = await getAllFollowersPublications(userId);
     const followerReposts = await getAllRepostsFromWhoFollows(userId);
-    const result = userPosts.rows.concat(
-      userReposts.rows,
-      followerPosts.rows,
-      followerReposts.rows
-    );
+    const result = userPosts.rows
+      .concat(userReposts.rows, followerPosts.rows, followerReposts.rows)
+      .sort((a, b) => b.postId - a.postId).slice(0,20)
     res.send(result);
   } catch (err) {
     res.status(500).send(err.message);
