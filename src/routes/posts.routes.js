@@ -13,7 +13,7 @@ import checkPostExistence from "../middlewares/check.post.existence.middleware.j
 
 const postsRouter = Router();
 
-postsRouter.get("/all-posts/", ensureAuthentication, findAllLinks);
+postsRouter.get("/all-posts", ensureAuthentication, findAllLinks);
 
 postsRouter.get("/user-posts", ensureAuthentication, findAllLinksById);
 
